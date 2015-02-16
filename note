@@ -1,0 +1,11 @@
+2015年 02月 14日 星期六 00:25:02 CST
+尝试开启分页机制，导致无限重启,实验发现SetupPaging这个函数不能放在call它的代码之前，否则导致操作系统无限重启，发现这里的函数的定义都是在调用之后，这难道是nasm的特性？以后再查.
+2015年 02月 15日 星期日 15:47:41 CST
+标志寄存器（16位FLAGS，32位EFLAGS）用来保存一条指令执行结束后，CPU所处的状态和运算的特征，其中的很多位被称为标志位ZF,OF,SF,CF等等
+spurious:假的，伪造的
+2015年 02月 16日 星期一 12:42:53 CST
+昨晚一晚上在检查代码，由于bochs中运行系统总是重启。糟糕的是自己安装的bochs没有调试功能，bochs的源码也没有，上网不便。而且自己把bochs的所有输出都转到了/dev/null.今天才想起bochs的输出包含寄存器信息，异常信息等，查看发现还是很详细的，有段选择子，段界限等，jmp跳转时检查cs有没有超出范围，LDT的索引有没有超出LDT.limit.关键信息是在hadware reset之前：exception():3rd exception with no resolution,遂上网查询，OSDev Wiki中写道：
+The CPU didn't manage to invoke an exception handler and would normally triple fault.This is probably due to a bad IDT register content,or a bad IDT descriptor.Sometimes(but less likely),it can also be due to a severebug in your exception handler code.Check your exception works with "illegal" ASM instructions.
+于是我仔细查看idt相关的代码，从它的定义到赋值再到加载，同时测试异常及硬件中断的处理程序，到了最后才发现自己在加载ldt时用了lidt指令，将idt给毁了。现在才发现等宽字体中l，i也难以区分。
+虽然话费了很多时间，但收获很丰富。
+
