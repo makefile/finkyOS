@@ -20,7 +20,11 @@ KERNEL_BIN:=$(OUT)$(subst .asm,.bin,$(KERNEL))
 OBJS=$(OUT)kernel/kernel.o $(OUT)kernel/global.o $(OUT)kernel/start.o $(OUT)lib/kliba.o $(OUT)lib/string.o \
 	$(OUT)kernel/protect.o $(OUT)kernel/i8259.o  $(OUT)lib/klib.o \
 	$(OUT)kernel/main.o $(OUT)kernel/proc.o  \
-	$(OUT)kernel/clock.o $(OUT)kernel/syscall.o
+	$(OUT)kernel/clock.o $(OUT)kernel/syscall.o \
+	$(OUT)kernel/keyboard.o $(OUT)kernel/tty.o \
+	$(OUT)kernel/vsprintf.o $(OUT)kernel/printf.o \
+	$(OUT)kernel/console.o
+
 IMG:=a.img
 MOUNTPOINT:=/mnt/usb/
 
@@ -74,6 +78,16 @@ bin/kernel/clock.o: kernel/clock.c
 	$(CC) $(CFLAGS) -o $@ $<
 bin/kernel/proc.o: kernel/proc.c
 	$(CC) $(CFLAGS) -o $@ $<
+bin/kernel/tty.o: kernel/tty.c
+	$(CC) $(CFLAGS) -o $@ $<
+bin/kernel/console.o: kernel/console.c
+	$(CC) $(CFLAGS) -o $@ $<
+bin/kernel/keyboard.o: kernel/keyboard.c
+	$(CC) $(CFLAGS) $(CF2) -o $@ $<
+bin/kernel/printf.o: kernel/printf.c
+	$(CC) $(CFLAGS) $(CF2) -o $@ $<
+bin/kernel/vsprintf.o: kernel/vsprintf.c
+	$(CC) $(CFLAGS) $(CF2) -o $@ $<
 	
 bin/lib/klib.o : lib/klib.c
 	$(CC) $(CFLAGS) $(CF2) -o $@ $<

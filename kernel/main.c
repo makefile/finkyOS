@@ -2,12 +2,13 @@
 #include "type.h"
 #include "const.h"
 #include "protect.h"
-#include "proto.h"
+#include "tty.h"
+#include "console.h"
 #include "string.h"
 #include "proc.h"
 #include "global.h"
 #include "display.h"
-
+#include "proto.h"
 public int kernel_main(){
 	
 	disp_str("start kernel_main----\n");
@@ -26,7 +27,7 @@ public int kernel_main(){
 			rpl=RPL_TASK;
 			eflags=0x1202;
 		}else{//user proc
-			p_task=user_proc_table+i-NR_TASKS;
+			p_task=user_task_table+i-NR_TASKS;
 			privilege=PRIVILEGE_USER;
 			rpl=RPL_USER;
 			eflags=0x202;//剥夺用户进程所有的IO权限

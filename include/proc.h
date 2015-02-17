@@ -47,6 +47,7 @@ typedef struct s_task {
 
 
 /* stacks of tasks */
+#define STACK_SIZE_TTY  	0x8000
 #define STACK_SIZE_PROCA	0x8000 //32kB
 #define STACK_SIZE_PROCB	0x8000
 #define STACK_SIZE_PROCC	0x8000
@@ -57,5 +58,7 @@ typedef struct s_task {
 void procA();
 void procB();
 void procC();
+
+void schedule();
 
 

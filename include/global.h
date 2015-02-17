@@ -1,3 +1,8 @@
+/*将全局变量的定义放在这里，跟某功能相关的变量在该.h中用extern引用
+**除了global.c,你无需包含本头文件,
+	实际上这不好
+**************************************/
+
 #ifdef _GLOBAL_VAR
 #undef EXTERN
 #define EXTERN //space,多次一举，extern即可
@@ -13,11 +18,13 @@ EXTERN u8 idt_ptr[6];//struct same as gdt_ptr
 EXTERN GATE idt[IDT_SIZE];
 EXTERN TSS tss;
 EXTERN PROCESS proc_table[NR_TASKS+NR_PROCS];
+
 EXTERN PROCESS *p_proc_ready;
 
 //extern	PROCESS		proc_table[];
 extern	char		task_stack[];
 extern  TASK            task_table[];
+extern TASK user_task_table[];
 extern irq_handler irq_table[];
 EXTERN int k_reenter;
 EXTERN int ticks;

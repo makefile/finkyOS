@@ -3,8 +3,11 @@
 #include"type.h"
 #include"const.h"
 #include"protect.h"
-#include"proto.h"
+#include"tty.h"
+#include"console.h"
 #include"proc.h"
+
+#include"proto.h"
 #include"global.h"
 //disp_pos in global.h,在使用disp_str（disp_int)之前必须初始化这个变量
 

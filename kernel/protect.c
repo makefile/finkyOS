@@ -3,6 +3,8 @@
 #include "protect.h"
 #include "proc.h"
 #include "string.h"
+#include "tty.h"
+#include "console.h"
 
 #include "global.h"
 #include "proto.h"

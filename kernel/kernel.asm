@@ -307,9 +307,15 @@ sys_call:
         mov es,dx
         mov esi ,esp
         mov esp,StackTop ;切换到内核栈
+        ;save over
+        push esi ;sys_write调用者指针
+        push ecx
+        push ebx
+        
         sti
         call [sys_call_table+eax*4] ;系统调用的代码要在内核栈中运行
         mov [esi+EAXREG-P_STACKBASE],eax ;return val
+        add esp,12 ;4*3
         cli
         inc dword [k_reenter] 
         

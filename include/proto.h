@@ -9,8 +9,8 @@ public void init_8259A();
 public void put_irq_handler(int irq,irq_handler handler);
 public void disable_irq(int irq);
 public void enable_irq(int irq);
-public void disable_int(int irq);
-public void enable_int(int irq);
+public void disable_int();
+public void enable_int();
 public void spurious_irq(int irq);
 public void clock_handler(int irq);
 public int sys_get_ticks();//proc.c
@@ -22,30 +22,30 @@ void sleep(int sec);
 void init_clock();
 void init_keyboard();
 /* tty.c */
-PUBLIC void task_tty();
-PUBLIC void in_process(TTY* p_tty, u32 key);
+public void task_tty();
+public void in_process(TTY* p_tty, u32 key);
 
 /* console.c */
-PUBLIC void out_char(CONSOLE* p_con, char ch);
-PUBLIC void scroll_screen(CONSOLE* p_con, int direction);
+public void out_char(CONSOLE* p_con, char ch);
+public void scroll_screen(CONSOLE* p_con, int direction);
 
 /* printf.c */
-PUBLIC  int     printf(const char *fmt, ...);
+public  int     printf(const char *fmt, ...);
 
 /* vsprintf.c */
-PUBLIC  int     vsprintf(char *buf, const char *fmt, va_list args);
+public  int     vsprintf(char *buf, const char *fmt, va_list args);
 
 /* 以下是系统调用相关 */
 
 /* 系统调用 - 系统级 */
 /* proc.c */
-PUBLIC  int     sys_get_ticks();
-PUBLIC  int     sys_write(char* buf, int len, PROCESS* p_proc);
+public  int     sys_get_ticks();
+public  int     sys_write(char* buf, int len, PROCESS* p_proc);
 /* syscall.asm */
-PUBLIC  void    sys_call();             /* int_handler */
+public  void    sys_call();             /* int_handler */
 
 /* 系统调用 - 用户级 */
-PUBLIC  int     get_ticks();
-PUBLIC  void    write(char* buf, int len);
+public  int     get_ticks();
+public  void    write(char* buf, int len);
 
 
