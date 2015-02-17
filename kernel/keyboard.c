@@ -25,12 +25,10 @@ private	int	alt_l;		/* l alt state	 */
 private	int	alt_r;		/* r left state	 */
 private	int	ctrl_l;		/* l ctrl state	 */
 private	int	ctrl_r;		/* l ctrl state	 */
-private	int	caps_lock;	/* Caps Lock	 */
-private	int	num_lock;	/* Num Lock	 */
-private	int	scroll_lock;	/* Scroll Lock	 */
 private	int	column;
 
-private int	caps_lock;	/* Caps Lock	 */
+//private
+ int	caps_lock;	/* Caps Lock	 不知为什么声明成static导致下面read时,这个值不为0*/
 private int	num_lock;	/* Num Lock	 */
 private int	scroll_lock;	/* Scroll Lock	 */
 
@@ -92,12 +90,11 @@ public void keyboard_read(TTY* p_tty)
 			 * 则 key 值将为定义在 keyboard.h 中的 'HOME'。
 			 */
 	u32*	keyrow;	/* 指向 keymap[] 的某一行 */
-
 	if(kb_in.count > 0){
 		code_with_E0 = 0;
-
+//printf("caps_lock:%x ",caps_lock);
 		scan_code = get_byte_from_kbuf();
-
+//disp_str("hhhhhh");
 		/* 下面开始解析扫描码 */
 		if (scan_code == 0xE1) {
 			int i;
@@ -150,6 +147,8 @@ public void keyboard_read(TTY* p_tty)
 			column = 0;
 
 			int caps = shift_l || shift_r;
+			//printf("shift:%x ",caps);
+			//
 			if (caps_lock) {
 				if ((keyrow[0] >= 'a') && (keyrow[0] <= 'z')){
 					caps = !caps;
@@ -158,13 +157,13 @@ public void keyboard_read(TTY* p_tty)
 			if (caps) {
 				column = 1;
 			}
-
+	//printf("start:colum=%x",column);
 			if (code_with_E0) {
 				column = 2;
 			}
 
 			key = keyrow[column];
-
+//printf("key:%x",key);
 			switch(key) {
 			case SHIFT_L:
 				shift_l = make;
@@ -285,7 +284,6 @@ public void keyboard_read(TTY* p_tty)
 				key |= alt_l	? FLAG_ALT_L	: 0;
 				key |= alt_r	? FLAG_ALT_R	: 0;
 				key |= pad      ? FLAG_PAD      : 0;
-
 				in_process(p_tty, key);
 			}
 		}
@@ -344,7 +342,7 @@ private void kb_ack()
 private void set_leds()
 {
 	u8 leds = (caps_lock << 2) | (num_lock << 1) | scroll_lock;
-
+	
 	kb_wait();
 	out_byte(KB_DATA, LED_CODE);
 	kb_ack();

@@ -25,7 +25,7 @@
 PRIVATE void set_cursor(unsigned int position);
 PRIVATE void set_video_start_addr(u32 addr);
 PRIVATE void flush(CONSOLE* p_con);
-
+PUBLIC void out_str(CONSOLE* p_con, char* str);
 /*======================================================================*
 			   init_screen
  *======================================================================*/
@@ -50,7 +50,9 @@ PUBLIC void init_screen(TTY* p_tty)
 		disp_pos = 0;
 	}
 	else {
-		out_char(p_tty->p_console, nr_tty + '0');
+		out_str(p_tty->p_console,"Welcome to fyk's OS tty");
+		out_char(p_tty->p_console, nr_tty + '1');
+		out_char(p_tty->p_console, '\n');
 		out_char(p_tty->p_console, '#');
 	}
 
@@ -106,7 +108,11 @@ PUBLIC void out_char(CONSOLE* p_con, char ch)
 
 	flush(p_con);
 }
-
+PUBLIC void out_str(CONSOLE* p_con, char* str){
+	int len=strlen(str);
+	int i=0;
+	while(len--) out_char(p_con,str[i++]);	
+}
 /*======================================================================*
                            flush
 *======================================================================*/

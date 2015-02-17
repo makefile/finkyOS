@@ -84,7 +84,7 @@ public int kernel_main(){
 
 	p_proc_ready	= proc_table;
 	init_clock();
-//        init_keyboard();
+//	init_keyboard(); //tty.c中调用
 	//disp_str("--------------------------------\n");
 	restart();
 	

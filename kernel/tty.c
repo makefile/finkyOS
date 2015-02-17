@@ -89,7 +89,7 @@ PUBLIC void in_process(TTY* p_tty, u32 key)
 		case F2:
 		case F3:
 		case F4:
-		case F5:
+		
 		case F6:
 		case F7:
 		case F8:
@@ -102,6 +102,8 @@ PUBLIC void in_process(TTY* p_tty, u32 key)
 				select_console(raw_code - F1);
 			}
 			break;
+		case F5:
+			select_console(1);
                 default:
                         break;
                 }
@@ -149,6 +151,7 @@ PRIVATE void tty_do_write(TTY* p_tty)
 		p_tty->inbuf_count--;
 
 		out_char(p_tty->p_console, ch);
+		if(ch=='\n') out_char(p_tty->p_console, '#');
 	}
 }
 
