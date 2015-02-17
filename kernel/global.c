@@ -8,5 +8,9 @@
 #include"global.h"
 //disp_pos in global.h,在使用disp_str（disp_int)之前必须初始化这个变量
 
-public char task_stack[STACK_SIZE_TOTAL];
-
+char task_stack[STACK_SIZE_TOTAL];
+TASK task_table[NR_TASKS]={{procA,STACK_SIZE_PROCA,"procA"},
+			   {procB,STACK_SIZE_PROCB,"procB"},
+			   {procC,STACK_SIZE_PROCC,"procC"}
+			  };
+//int k_reenter;

@@ -160,11 +160,14 @@ public void init_prot()
 
         init_idt_desc(INT_VECTOR_IRQ8 + 7,      DA_386IGate,
                       hwint15,                  PRIVILEGE_KRNL);
-        // 填充 GDT 中进程的 LDT 的描述符              
-	init_descriptor(&gdt[INDEX_LDT_FIRST],
-			vir2phys(seg2phys(SELECTOR_KERNEL_DS), proc_table[0].ldts),
-			LDT_SIZE*sizeof(DESCRIPTOR) - 1,
-			DA_LDT);  
+        // 填充 GDT 中进程的 LDT 的描述符 
+        int i;
+        u16 index=INDEX_LDT_FIRST;
+        for(i=0;i<NR_TASKS;i++,index++){             
+		init_descriptor(&gdt[index],
+			vir2phys(seg2phys(SELECTOR_KERNEL_DS), proc_table[i].ldts),
+			LDT_SIZE*sizeof(DESCRIPTOR) - 1,DA_LDT); 
+	} 
 	/* 填充 GDT 中 TSS 这个描述符 */
 	memset(&tss, 0, sizeof(tss));
 	tss.ss0		= SELECTOR_KERNEL_DS;

@@ -23,8 +23,7 @@ public void cstart(){
 	*idt_base=(u32)&idt;
 	
 	//disp_pos=0;
-	disp_str("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
-		"----------cstart-------\n");
+	disp_str("\n\n\n\n\n----------cstart-------\n");
 	//disp_int(10);
 	
 	init_prot();//初始化8259A（屏蔽硬件中断，打开了键盘中断等）始化idt以及gdt中的tss，ldt

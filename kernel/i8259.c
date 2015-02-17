@@ -33,9 +33,9 @@ public void init_8259A()
 
 	/* Slave  8259, ICW4. */
 	out_byte(INT_S_CTLMASK,	0x1);
-//打开键盘中断
+//打开键盘中断和时钟中断
 	/* Master 8259, OCW1.  */
-	out_byte(INT_M_CTLMASK,	0xFD);
+	out_byte(INT_M_CTLMASK,	0xFE);
 
 	/* Slave  8259, OCW1.  */
 	out_byte(INT_S_CTLMASK,	0xFF);

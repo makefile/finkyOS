@@ -1,11 +1,4 @@
 
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                               proc.h
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                                                    Forrest Yu, 2005
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
-
 typedef struct s_stackframe {	/* proc_ptr points here				↑ Low			*/
 	u32	gs;		/* ┓						│			*/
 	u32	fs;		/* ┃						│			*/
@@ -27,6 +20,9 @@ typedef struct s_stackframe {	/* proc_ptr points here				↑ Low			*/
 	u32	ss;		/*  ┛						┷High			*/
 }STACK_FRAME;
 
+/* Number of tasks */
+#define NR_TASKS 3		//number of process
+#define LDT_SIZE NR_TASKS*2	//每个任务（进程）一个单独的LDT(内含两项cs,ds)
 
 typedef struct s_proc {
 	STACK_FRAME regs;          /* process registers saved in stack frame */
@@ -40,7 +36,7 @@ typedef struct s_proc {
 	u32 pid;                   /* process id passed in from MM */
 	char p_name[16];           /* name of the process */
 }PROCESS;
-/*
+typedef  void (*task_f)();
 typedef struct s_task {
 	task_f	initial_eip;
 	int	stacksize;
@@ -48,15 +44,16 @@ typedef struct s_task {
 }TASK;
 
 
-/* Number of tasks */
-//#define NR_TASKS	3 //change to const.h
-
 /* stacks of tasks */
 #define STACK_SIZE_PROCA	0x8000 //32kB
-#define STACK_SIZE_TESTB	0x8000
-#define STACK_SIZE_TESTC	0x8000
+#define STACK_SIZE_PROCB	0x8000
+#define STACK_SIZE_PROCC	0x8000
 
-#define STACK_SIZE_TOTAL	0x8000//(STACK_SIZE_TESTA + \
-				STACK_SIZE_TESTB + \
-				STACK_SIZE_TESTC)
+#define STACK_SIZE_TOTAL	(STACK_SIZE_PROCA + \
+				STACK_SIZE_PROCB + \
+				STACK_SIZE_PROCC)
+void procA();
+void procB();
+void procC();
+
 

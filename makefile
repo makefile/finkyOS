@@ -19,12 +19,14 @@ LDR_BIN:=$(OUT)$(subst .asm,.bin,$(LDR))
 KERNEL_BIN:=$(OUT)$(subst .asm,.bin,$(KERNEL))
 OBJS=$(OUT)kernel/kernel.o $(OUT)kernel/global.o $(OUT)kernel/start.o $(OUT)lib/kliba.o $(OUT)lib/string.o \
 	$(OUT)kernel/protect.o $(OUT)kernel/i8259.o  $(OUT)lib/klib.o \
-	$(OUT)kernel/main.o
+	$(OUT)kernel/main.o \
+	$(OUT)kernel/clock.o
 IMG:=a.img
 MOUNTPOINT:=/mnt/usb/
 
-.PHONY : all cp clean um img
-#not file obj
+.PHONY : x all cp clean um img #not file obj
+x:bin cp
+	@./b
 all:clean bin cp
 	@ ./b
 bin : $(BOOT_BIN) $(LDR_BIN) $(KERNEL_BIN)
@@ -65,6 +67,8 @@ bin/kernel/protect.o : kernel/protect.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 bin/kernel/main.o : kernel/main.c
+	$(CC) $(CFLAGS) -o $@ $<
+bin/kernel/clock.o: kernel/clock.c
 	$(CC) $(CFLAGS) -o $@ $<
 	
 bin/lib/klib.o : lib/klib.c

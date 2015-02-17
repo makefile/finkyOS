@@ -4,8 +4,7 @@
 #define DT_NUM 128 	//the descriptor num in GDT and IDT
 #define IDT_SIZE 256	//IDT number
 
-#define NR_TASKS 1	//number of process
-#define LDT_SIZE NR_TASKS*2	//每个任务（进程）一个单独的LDT(内含两项cs,ds)
+
 /* 权限 */
 #define	PRIVILEGE_KRNL	0
 #define	PRIVILEGE_TASK	1

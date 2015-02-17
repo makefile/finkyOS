@@ -1,8 +1,11 @@
 #ifdef _GLOBAL_VAR
 #undef EXTERN
-#define EXTERN //space
+#define EXTERN //space,多次一举，extern即可
 #endif
 
+#ifndef EXTERN
+#include"type.h" //.c文件可单独包含本文件而不用再包含type.h
+#endif
 EXTERN int disp_pos;
 EXTERN u8 gdt_ptr[6];//0-15:limit,16-47:base
 EXTERN DESCRIPTOR gdt[DT_NUM];//GDT_SIZE,128
@@ -14,5 +17,5 @@ EXTERN PROCESS *p_proc_ready;
 
 //extern	PROCESS		proc_table[];
 extern	char		task_stack[];
-//extern  TASK            task_table[];
-
+extern  TASK            task_table[];
+EXTERN int k_reenter;
