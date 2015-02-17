@@ -17,4 +17,6 @@ public int sys_get_ticks();//proc.c
 //syscall.asm
 public void sys_call();//int handler
 public int get_ticks();
+void milli_delay(int m_sec);
+void sleep(int sec);
 

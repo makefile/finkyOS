@@ -63,13 +63,20 @@ public int kernel_main(){
 	k_reenter = 0;
 	ticks = 0;
 
+
 	p_proc_ready	= proc_table;
-//	init_clock();
+	init_clock();
 //        init_keyboard();
 	//disp_str("--------------------------------\n");
 	restart();
 	
 	while(1);//not reach here
+}
+void init_clock(){
+	//init 8253可编程中断定时器
+	out_byte(TIMER_MODE ,RATE_GENERATOR);
+	out_byte(TIMER0,(u8)(TIMER_FREQ/HZ));
+	out_byte(TIMER0 ,(u8)(TIMER_FREQ/HZ));
 }
 void procA(){
 	int i=0;
@@ -79,7 +86,7 @@ void procA(){
 			disp_str("A");
 			disp_int(i++);
 			disp_str("|");
-			delay(1);
+			milli_delay(1000);
 		}
 }
 void procB(){
@@ -88,7 +95,7 @@ void procB(){
 			disp_str("B");
 			disp_int(i++);
 			disp_str("|");
-			delay(2);
+			sleep(2);
 		}
 }
 void procC(){
