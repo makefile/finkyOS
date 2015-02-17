@@ -160,6 +160,9 @@ public void init_prot()
 
         init_idt_desc(INT_VECTOR_IRQ8 + 7,      DA_386IGate,
                       hwint15,                  PRIVILEGE_KRNL);
+        //系统调用              
+        init_idt_desc(INT_VECTOR_SYS_CALL,      DA_386IGate,
+                      sys_call,                  PRIVILEGE_USER);//用户应用程序可调用
         // 填充 GDT 中进程的 LDT 的描述符 
         int i;
         u16 index=INDEX_LDT_FIRST;

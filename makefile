@@ -19,8 +19,8 @@ LDR_BIN:=$(OUT)$(subst .asm,.bin,$(LDR))
 KERNEL_BIN:=$(OUT)$(subst .asm,.bin,$(KERNEL))
 OBJS=$(OUT)kernel/kernel.o $(OUT)kernel/global.o $(OUT)kernel/start.o $(OUT)lib/kliba.o $(OUT)lib/string.o \
 	$(OUT)kernel/protect.o $(OUT)kernel/i8259.o  $(OUT)lib/klib.o \
-	$(OUT)kernel/main.o \
-	$(OUT)kernel/clock.o
+	$(OUT)kernel/main.o $(OUT)kernel/proc.o  \
+	$(OUT)kernel/clock.o $(OUT)kernel/syscall.o
 IMG:=a.img
 MOUNTPOINT:=/mnt/usb/
 
@@ -51,6 +51,8 @@ $(KERNEL_BIN) : $(OBJS)
 
 bin/kernel/kernel.o : kernel/kernel.asm
 	$(AS) $(ASKF) -o $@ $<
+bin/kernel/syscall.o: kernel/syscall.asm
+	$(AS) $(ASKF) -o $@ $<
 
 bin/kernel/start.o: kernel/start.c include/type.h include/const.h include/protect.h \
 		include/proto.h include/string.h
@@ -69,6 +71,8 @@ bin/kernel/protect.o : kernel/protect.c
 bin/kernel/main.o : kernel/main.c
 	$(CC) $(CFLAGS) -o $@ $<
 bin/kernel/clock.o: kernel/clock.c
+	$(CC) $(CFLAGS) -o $@ $<
+bin/kernel/proc.o: kernel/proc.c
 	$(CC) $(CFLAGS) -o $@ $<
 	
 bin/lib/klib.o : lib/klib.c

@@ -61,7 +61,7 @@ public int kernel_main(){
 
 	put_irq_handler(CLOCK_IRQ,clock_handler);//设置时钟中断处理程序
 	k_reenter = 0;
-//	ticks = 0;
+	ticks = 0;
 
 	p_proc_ready	= proc_table;
 //	init_clock();
@@ -75,6 +75,7 @@ void procA(){
 	int i=0;
 	//disp_pos=0;
 		while(1){
+			disp_int(get_ticks());
 			disp_str("A");
 			disp_int(i++);
 			disp_str("|");
@@ -87,7 +88,7 @@ void procB(){
 			disp_str("B");
 			disp_int(i++);
 			disp_str("|");
-			delay(1);
+			delay(2);
 		}
 }
 void procC(){
@@ -96,6 +97,6 @@ void procC(){
 			disp_str("C");
 			disp_int(i++);
 			disp_str("|");
-			delay(1);
+			delay(3);
 		}
 }

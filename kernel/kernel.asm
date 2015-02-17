@@ -21,6 +21,7 @@ extern p_proc_ready
 extern tss
 extern k_reenter
 extern irq_table
+extern sys_call_table
 
 [section .data]
 clock_msg db "*"
@@ -67,6 +68,8 @@ global hwint12
 global hwint13
 global hwint14
 global hwint15
+
+global sys_call
 
 _start:	; 跳到这里来的时候，我们假设 gs 指向显存
 
@@ -292,4 +295,23 @@ exception:
 	add	esp, 4*2	; 相当于弹出两个，让栈顶指向 EIP，
 				;堆栈中从顶向下依次是：EIP、CS、EFLAGS
 	hlt
-
+sys_call:
+	pushad ;a,c,d,b,esp,ebp,esi,edi
+        push ds
+        push es
+        push fs
+        push gs ;为了不影响进程的执行，保存原寄存器，以防万一
+        ;因为mov al,EOI改变了al的值
+        mov dx,ss
+        mov ds,dx ;这三个为了使用调用函数等
+        mov es,dx
+        mov esi ,esp
+        mov esp,StackTop ;切换到内核栈
+        sti
+        call [sys_call_table+eax*4] ;系统调用的代码要在内核栈中运行
+        mov [esi+EAXREG-P_STACKBASE],eax ;return val
+        cli
+        inc dword [k_reenter] 
+        
+        jmp restart
+        

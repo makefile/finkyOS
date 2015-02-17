@@ -13,4 +13,8 @@ public void disable_int(int irq);
 public void enable_int(int irq);
 public void spurious_irq(int irq);
 public void clock_handler(int irq);
+public int sys_get_ticks();//proc.c
+//syscall.asm
+public void sys_call();//int handler
+public int get_ticks();
 

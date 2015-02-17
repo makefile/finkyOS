@@ -15,3 +15,4 @@ TASK task_table[NR_TASKS]={{procA,STACK_SIZE_PROCA,"procA"},
 			  };
 //int k_reenter;
 irq_handler irq_table[NR_IRQ];
+void* sys_call_table[NR_SYS_CALL]={sys_get_ticks};
