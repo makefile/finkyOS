@@ -166,7 +166,7 @@ public void init_prot()
         // 填充 GDT 中进程的 LDT 的描述符 
         int i;
         u16 index=INDEX_LDT_FIRST;
-        for(i=0;i<NR_TASKS;i++,index++){             
+        for(i=0;i<NR_TASKS+NR_PROCS;i++,index++){             
 		init_descriptor(&gdt[index],
 			vir2phys(seg2phys(SELECTOR_KERNEL_DS), proc_table[i].ldts),
 			LDT_SIZE*sizeof(DESCRIPTOR) - 1,DA_LDT); 

@@ -21,7 +21,8 @@ typedef struct s_stackframe {	/* proc_ptr points here				↑ Low			*/
 }STACK_FRAME;
 
 /* Number of tasks */
-#define NR_TASKS 3		//number of process
+#define NR_TASKS 1		//number of task.ring1
+#define NR_PROCS 3	//ring3
 #define LDT_SIZE NR_TASKS*2	//每个任务（进程）一个单独的LDT(内含两项cs,ds)
 
 typedef struct s_proc {
@@ -35,6 +36,7 @@ typedef struct s_proc {
 
 	u32 pid;                   /* process id passed in from MM */
 	char p_name[16];           /* name of the process */
+	int nr_tty;	//关联的TTY
 }PROCESS;
 typedef  void (*task_f)();
 typedef struct s_task {

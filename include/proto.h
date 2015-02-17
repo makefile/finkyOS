@@ -19,4 +19,33 @@ public void sys_call();//int handler
 public int get_ticks();
 void milli_delay(int m_sec);
 void sleep(int sec);
+void init_clock();
+void init_keyboard();
+/* tty.c */
+PUBLIC void task_tty();
+PUBLIC void in_process(TTY* p_tty, u32 key);
+
+/* console.c */
+PUBLIC void out_char(CONSOLE* p_con, char ch);
+PUBLIC void scroll_screen(CONSOLE* p_con, int direction);
+
+/* printf.c */
+PUBLIC  int     printf(const char *fmt, ...);
+
+/* vsprintf.c */
+PUBLIC  int     vsprintf(char *buf, const char *fmt, va_list args);
+
+/* 以下是系统调用相关 */
+
+/* 系统调用 - 系统级 */
+/* proc.c */
+PUBLIC  int     sys_get_ticks();
+PUBLIC  int     sys_write(char* buf, int len, PROCESS* p_proc);
+/* syscall.asm */
+PUBLIC  void    sys_call();             /* int_handler */
+
+/* 系统调用 - 用户级 */
+PUBLIC  int     get_ticks();
+PUBLIC  void    write(char* buf, int len);
+
 
