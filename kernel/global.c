@@ -14,3 +14,4 @@ TASK task_table[NR_TASKS]={{procA,STACK_SIZE_PROCA,"procA"},
 			   {procC,STACK_SIZE_PROCC,"procC"}
 			  };
 //int k_reenter;
+irq_handler irq_table[NR_IRQ];

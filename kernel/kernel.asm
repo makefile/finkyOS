@@ -20,6 +20,7 @@ extern disp_pos
 extern p_proc_ready
 extern tss
 extern k_reenter
+extern irq_table
 
 [section .data]
 clock_msg db "*"
@@ -94,40 +95,28 @@ csinit:
 	ltr ax
 	
 	jmp kernel_main
-	;hlt
 
 restart: ;在main.c中被调用
-	;ud2
-	dec dword [k_reenter]
+	
 	mov esp,[p_proc_ready] ;esp指向PCB的栈顶
 	lldt [esp+P_LDT_SEL]
 	;惊喜啊，将lldt抄写成了lidt,导致bochs总是重启系统，其中日志显示3rd exception with no resolution,在OSDev Wiki中讲到可能是IDT内容或描述符出错
 	lea eax,[esp+P_STACKTOP]
 	mov dword [tss+TSS3_S_SP0],eax
-	
-	pop gs
-	pop fs
-	pop es
-	pop ds
-	popad ;edi~eax
-
-	add esp,4 ;跳过retaddr,指向eip
-
-	iretd ;ring0跳到other
+	;jmp re_enter
+re_enter: ;让重入的中断直接返回
+	dec dword [k_reenter] 
+	        
+        pop gs
+        pop fs
+        pop es
+        pop ds
+        popad
+        iretd
 ; 中断和异常 -- 硬件中断
 ; ---------------------------------
 %macro  hwint_master    1
-        push    %1
-        call    spurious_irq
-        add     esp, 4
-        hlt
-%endmacro
-; ---------------------------------
-
-ALIGN   16
-hwint00:                ; Interrupt routine for irq 0 (the clock).
-        sub esp,4
-        pushad ;a,c,d,b,esp,ebp,esi,edi
+	pushad ;a,c,d,b,esp,ebp,esi,edi
         push ds
         push es
         push fs
@@ -136,43 +125,39 @@ hwint00:                ; Interrupt routine for irq 0 (the clock).
         mov dx,ss
         mov ds,dx ;这三个为了使用调用函数等
         mov es,dx
-        
-        inc byte [gs:10] ;第一行第5个字符跳动变化
-        
+             
+	in al,INT_M_CTLMASK
+	or al,(1<<%1)
+	out INT_M_CTLMASK,al ;不容许再发生该中断,也就是不会再发生重入，那重入的代码也就没用了
+	
         mov al,EOI ;reenable master 8259
         out INT_M_CTL,al ;将EOI位置1,告诉8259A当前中断结束，否则不再发生时钟中断
-        
-        inc dword [k_reenter]
-        cmp dword [k_reenter],0
-        jne .re_enter
-        
         mov esp,StackTop ;切换到内核栈
-        
-        sti
-        
-        call clock_handler
-        
-        ;push clock_msg
-        ;call disp_str
-        ;add esp,4
-        ;push 1
-        ;call delay
-        ;add esp,4
-        
+
+        sti ;CPU在响应中断的过程中会自动关中断，下面的操作可能很耗时，应该容许其他中断的发生，如键盘响应等。
+        ;call clock_handler
+        push %1
+        call [irq_table+4 * %1]
+        pop ecx
         cli
         
+        in al,INT_M_CTLMASK
+	and al,~(1<<%1)
+	out INT_M_CTLMASK,al ;容许再发生该中断
+	
+	inc dword [k_reenter]
+        cmp dword [k_reenter],0
+        jne re_enter
         jmp restart
-.re_enter: ;让重入的中断直接返回
-	dec dword [k_reenter] 
-	        
-        pop gs
-        pop fs
-        pop es
-        pop ds
-        popad
-        add esp,4
-        iretd
+	
+%endmacro
+; ---------------------------------
 
+ALIGN   16
+hwint00:                ; Interrupt routine for irq 0 (the clock).
+        inc byte [gs:14] ;第一行第5个字符跳动变化
+	hwint_master	0
+	
 ALIGN   16
 hwint01:                ; Interrupt routine for irq 1 (keyboard)
         hwint_master    1

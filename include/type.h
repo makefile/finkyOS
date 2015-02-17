@@ -7,5 +7,5 @@ typedef unsigned char u8;
 #define public 		//space
 #define private static  //limit the scope of var in only one file
 #define EXTERN extern
-
+typedef void (*irq_handler)(int irq);
 #endif

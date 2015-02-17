@@ -3,7 +3,8 @@
 #include "const.h"
 #include "protect.h"
 #include "proto.h"
-
+#include "proc.h"
+#include "global.h"
 
 /*======================================================================*
                             init_8259A
@@ -33,14 +34,22 @@ public void init_8259A()
 
 	/* Slave  8259, ICW4. */
 	out_byte(INT_S_CTLMASK,	0x1);
-//打开键盘中断和时钟中断
+//打开键盘中断和时钟中断0xfe
 	/* Master 8259, OCW1.  */
-	out_byte(INT_M_CTLMASK,	0xFE);
+	out_byte(INT_M_CTLMASK,	0xFf);//0xff屏蔽所有中断，设置中断处理程序时打开
 
 	/* Slave  8259, OCW1.  */
 	out_byte(INT_S_CTLMASK,	0xFF);
+	int i;
+	for(i=0;i<NR_IRQ;i++) irq_table[i]=spurious_irq;
+
 }
 //所有中断的处理
 public void spurious_irq(int irq){
 	disp_str("irq:");disp_int(irq);disp_str("\n");
+}
+public void put_irq_handler(int irq,irq_handler handler){
+	disable_irq(irq);
+	irq_table[irq]=handler;
+	enable_irq(irq);
 }

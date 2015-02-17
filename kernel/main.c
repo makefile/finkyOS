@@ -59,6 +59,7 @@ public int kernel_main(){
 	proc_table[1].ticks = proc_table[1].priority =  5;
 	proc_table[2].ticks = proc_table[2].priority =  3;
 
+	put_irq_handler(CLOCK_IRQ,clock_handler);//设置时钟中断处理程序
 	k_reenter = 0;
 //	ticks = 0;
 

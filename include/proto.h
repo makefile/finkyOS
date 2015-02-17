@@ -6,4 +6,11 @@ public void disp_color_str(char *info,int color);
 public void disp_int(int n);
 public void init_prot();
 public void init_8259A();
+public void put_irq_handler(int irq,irq_handler handler);
+public void disable_irq(int irq);
+public void enable_irq(int irq);
+public void disable_int(int irq);
+public void enable_int(int irq);
+public void spurious_irq(int irq);
+public void clock_handler(int irq);
 
