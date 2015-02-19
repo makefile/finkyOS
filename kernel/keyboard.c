@@ -13,6 +13,7 @@
 #include "console.h"
 #include "global.h"
 #include "proto.h"
+#include"irq.h"
 #include "keyboard.h"
 #include "keymap.h"
 
@@ -25,12 +26,14 @@ private	int	alt_l;		/* l alt state	 */
 private	int	alt_r;		/* r left state	 */
 private	int	ctrl_l;		/* l ctrl state	 */
 private	int	ctrl_r;		/* l ctrl state	 */
-private	int	column;
 
-//private
- int	caps_lock;	/* Caps Lock	 不知为什么声明成static导致下面read时,这个值不为0*/
+
+//private int test;
+static int	caps_lock;	/* Caps Lock	 */
 private int	num_lock;	/* Num Lock	 */
 private int	scroll_lock;	/* Scroll Lock	 */
+
+//private	
 
 private u8	get_byte_from_kbuf();
 private void    set_leds();
@@ -51,6 +54,7 @@ public void keyboard_handler(int irq)
 			kb_in.p_head = kb_in.buf;
 		}
 		kb_in.count++;
+		//disp_str("handler:\n");disp_int(caps_lock);disp_int(&test);
 	}
 }
 
@@ -70,7 +74,7 @@ public void init_keyboard()
 	caps_lock   = 0;
 	num_lock    = 1;
 	scroll_lock = 0;
-
+//disp_str("init_keyb--");
 	set_leds();
 
         put_irq_handler(KEYBOARD_IRQ, keyboard_handler);/*设定键盘中断处理程序*/
@@ -85,16 +89,17 @@ public void keyboard_read(TTY* p_tty)
 	u8	scan_code;
 	char	output[2];
 	int	make;	/* 1: make;  0: break. */
-
 	u32	key = 0;/* 用一个整型来表示一个键。比如，如果 Home 被按下，
 			 * 则 key 值将为定义在 keyboard.h 中的 'HOME'。
 			 */
 	u32*	keyrow;	/* 指向 keymap[] 的某一行 */
 	if(kb_in.count > 0){
 		code_with_E0 = 0;
-//printf("caps_lock:%x ",caps_lock);
+		
+//printf("------read::caps_lock:%x-------",caps_lock);
 		scan_code = get_byte_from_kbuf();
-//disp_str("hhhhhh");
+		printf("scan_code:%x %d---",scan_code,scan_code);
+		printf("test:%s---","hello");
 		/* 下面开始解析扫描码 */
 		if (scan_code == 0xE1) {
 			int i;
@@ -144,7 +149,7 @@ public void keyboard_read(TTY* p_tty)
 			/* 先定位到 keymap 中的行 */
 			keyrow = &keymap[(scan_code & 0x7F) * MAP_COLS];
 
-			column = 0;
+			int column = 0;
 
 			int caps = shift_l || shift_r;
 			//printf("shift:%x ",caps);
@@ -185,6 +190,7 @@ public void keyboard_read(TTY* p_tty)
 				break;
 			case CAPS_LOCK:
 				if (make) {
+//				printf("-----CAPS down before:%x",caps_lock);
 					caps_lock   = !caps_lock;
 					set_leds();
 				}
@@ -287,7 +293,9 @@ public void keyboard_read(TTY* p_tty)
 				in_process(p_tty, key);
 			}
 		}
+		//printf("--afterread::caps_lock:%x----",caps_lock);
 	}
+	
 }
 
 /*======================================================================*
@@ -342,7 +350,7 @@ private void kb_ack()
 private void set_leds()
 {
 	u8 leds = (caps_lock << 2) | (num_lock << 1) | scroll_lock;
-	
+//disp_str("----setleds caps_lock:-----");disp_int(caps_lock);
 	kb_wait();
 	out_byte(KB_DATA, LED_CODE);
 	kb_ack();

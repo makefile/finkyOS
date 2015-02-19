@@ -11,7 +11,7 @@
 #include "proto.h"
 public int kernel_main(){
 	
-	disp_str("start kernel_main----\n");
+//	disp_str("start kernel_main----\n");
 	TASK*		p_task		= task_table;
 	PROCESS*	p_proc		= proc_table;//now first proc
 	u16		selector_ldt	= SELECTOR_LDT_FIRST;
@@ -106,7 +106,7 @@ void procA(){
 void procB(){
 	int i=0x100;
 		while(1){
-			disp_str("B");
+			disp_color_str("B",BRIGHT|MAKE_COLOR(BLACK,GREEN));
 			//disp_int(i++);
 			disp_str("|");
 			sleep(2);
@@ -115,7 +115,7 @@ void procB(){
 void procC(){
 	int i=0x1000;
 		while(1){
-			disp_str("C");
+			disp_color_str("C",BRIGHT|MAKE_COLOR(BLACK,GREEN));
 			//disp_int(i++);
 			disp_str("|");
 			delay(3);

@@ -17,7 +17,7 @@ OUT:=bin/
 BOOT_BIN:=$(OUT)$(subst .asm,.bin,$(BOOT))
 LDR_BIN:=$(OUT)$(subst .asm,.bin,$(LDR))
 KERNEL_BIN:=$(OUT)$(subst .asm,.bin,$(KERNEL))
-OBJS=$(OUT)kernel/kernel.o $(OUT)kernel/global.o $(OUT)kernel/start.o $(OUT)lib/kliba.o $(OUT)lib/string.o \
+OBJS=$(OUT)kernel/kernel.o $(OUT)kernel/global.o $(OUT)kernel/start.o $(OUT)lib/kliba.o $(OUT)lib/string.o $(OUT)lib/cstring.o \
 	$(OUT)kernel/protect.o $(OUT)kernel/i8259.o  $(OUT)lib/klib.o \
 	$(OUT)kernel/main.o $(OUT)kernel/proc.o  \
 	$(OUT)kernel/clock.o $(OUT)kernel/syscall.o \
@@ -97,6 +97,8 @@ bin/lib/kliba.o : lib/kliba.asm
 
 bin/lib/string.o : lib/string.asm
 	$(AS) $(ASKF) -o $@ $<
+bin/lib/cstring.o: lib/string.c
+	$(CC) $(CFLAGS)  -o $@ $<
 
 um:
 	@sudo umount $(MOUNTPOINT)

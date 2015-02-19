@@ -24,5 +24,6 @@ typedef struct s_tty
 	struct s_console *	p_console;
 }TTY;
 
+extern TTY tty_table[];//NR_CONSOLES
 
 #endif /* _ORANGES_TTY_H_ */

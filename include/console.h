@@ -1,8 +1,6 @@
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 			      console.h
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-						    Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #ifndef _ORANGES_CONSOLE_H_
@@ -25,6 +23,18 @@ typedef struct s_console
 #define SCREEN_WIDTH		80
 
 #define DEFAULT_CHAR_COLOR	0x07	/* 0000 0111 黑底白字 */
+#define NR_CONSOLES	3 //tty
+/* VGA */
+#define	CRTC_ADDR_REG	0x3D4	/* CRT Controller Registers - Addr Register */
+#define	CRTC_DATA_REG	0x3D5	/* CRT Controller Registers - Data Register */
+#define	START_ADDR_H	0xC	/* reg index of video mem start addr (MSB) */
+#define	START_ADDR_L	0xD	/* reg index of video mem start addr (LSB) */
+#define	CURSOR_H	0xE	/* reg index of cursor position (MSB) */
+#define	CURSOR_L	0xF	/* reg index of cursor position (LSB) */
+#define	V_MEM_BASE	0xB8000	/* base of color video memory */
+#define	V_MEM_SIZE	0x8000	/* 32K: B8000H -> BFFFFH */
 
+extern CONSOLE console_table[NR_CONSOLES];
+extern int nr_current_console;
 
 #endif /* _ORANGES_CONSOLE_H_ */

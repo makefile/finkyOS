@@ -6,6 +6,7 @@
 #include "console.h"
 #include "string.h"
 #include "proc.h"
+#include"irq.h"
 #include "global.h"
 #include "display.h"
 #include "proto.h"

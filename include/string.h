@@ -1,5 +1,6 @@
 
-public void* memcpy(void* dst,void *src,int size);
-public void  memset(void* dst,char ch,int size);
-public void* strcpy(void* dst,void* src);
+void* memcpy(void* dst,void *src,int size);
+void  memset(void* dst,char ch,int size);
+void* strcpy(void* dst,void* src);
 int strlen(char* str);
+void str_rev(char*str);

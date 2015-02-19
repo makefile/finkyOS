@@ -158,7 +158,7 @@ re_enter: ;让重入的中断直接返回
 
 ALIGN   16
 hwint00:                ; Interrupt routine for irq 0 (the clock).
-        inc byte [gs:14] ;第一行第5个字符跳动变化
+        ;inc byte [gs:14] ;第一行第5个字符跳动变化
 	hwint_master	0
 	
 ALIGN   16

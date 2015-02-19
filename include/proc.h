@@ -51,8 +51,9 @@ typedef struct s_task {
 #define STACK_SIZE_PROCA	0x8000 //32kB
 #define STACK_SIZE_PROCB	0x8000
 #define STACK_SIZE_PROCC	0x8000
-
-#define STACK_SIZE_TOTAL	(STACK_SIZE_PROCA + \
+//极为重要，不可有偏差
+#define STACK_SIZE_TOTAL	(STACK_SIZE_TTY+ \
+				STACK_SIZE_PROCA + \
 				STACK_SIZE_PROCB + \
 				STACK_SIZE_PROCC)
 void procA();
@@ -61,4 +62,8 @@ void procC();
 
 void schedule();
 
-
+extern PROCESS proc_table[];
+extern PROCESS *p_proc_ready;
+extern	char		task_stack[];
+extern  TASK            task_table[];
+extern TASK user_task_table[];

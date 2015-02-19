@@ -137,5 +137,10 @@ typedef struct s_tss {
 
 #define INT_VECTOR_SYS_CALL 0x82
 
+extern u8 gdt_ptr[6];//0-15:limit,16-47:base
+extern DESCRIPTOR gdt[DT_NUM];//GDT_SIZE,128
+extern u8 idt_ptr[6];//struct same as gdt_ptr
+extern GATE idt[IDT_SIZE];
+extern TSS tss;
 
 #endif /* _PROTECT_H_ */

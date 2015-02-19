@@ -8,7 +8,8 @@
 //#include "string.h"
 //#include "global.h"
 #include"display.h"
-
+#include"stdlib.h"
+#include"string.h" //str_rev
 /*======================================================================*
                                itoa
  *======================================================================*/
@@ -44,7 +45,24 @@ public char * itoa(char * str, int num)
 
 	return str;
 }
-
+char* itoad(char* str,int num){
+	char* p=str;
+	int left;
+	if(num==0){ *p++='0';*p=0;return str;}
+	else if(num<0){
+		num=-num;
+		*p++='-';
+	}
+	while(num){
+		left=num%10;
+		*p++='0'+left;
+		num/=10;
+	}
+	*p=0;
+	if(str[0]!='-') str_rev(str);
+	else str_rev(&str[1]);
+	return str;
+}
 /*======================================================================*
                                disp_int
  *======================================================================*/
