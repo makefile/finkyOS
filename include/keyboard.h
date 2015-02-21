@@ -138,5 +138,7 @@ typedef struct s_kb {
 #define LED_CODE	0xED
 #define KB_ACK		0xFA
 
+void init_keyboard();
+
 
 #endif /* _ORANGES_KEYBOARD_H_ */

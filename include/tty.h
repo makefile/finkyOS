@@ -1,12 +1,10 @@
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 				tty.h
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-						    Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-#ifndef _ORANGES_TTY_H_
-#define _ORANGES_TTY_H_
+#ifndef _TTY_H_
+#define _TTY_H_
 
 
 #define TTY_IN_BYTES	256	/* tty input queue size */
@@ -26,4 +24,8 @@ typedef struct s_tty
 
 extern TTY tty_table[];//NR_CONSOLES
 
-#endif /* _ORANGES_TTY_H_ */
+/* tty.c */
+extern void task_tty();
+extern void in_process(TTY* p_tty, u32 key);
+
+#endif /* _TTY_H_ */

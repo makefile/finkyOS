@@ -3,10 +3,10 @@
 			      console.h
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-#ifndef _ORANGES_CONSOLE_H_
-#define _ORANGES_CONSOLE_H_
-
-
+#ifndef _CONSOLE_H_
+#define _CONSOLE_H_
+#include"display.h"
+#include"tty.h"
 /* CONSOLE */
 typedef struct s_console
 {
@@ -21,8 +21,10 @@ typedef struct s_console
 
 #define SCREEN_SIZE		(80 * 25)
 #define SCREEN_WIDTH		80
-
+#define SCR_WIDTH SCREEN_WIDTH
 #define DEFAULT_CHAR_COLOR	0x07	/* 0000 0111 黑底白字 */
+#define GRAY_CHAR (MAKE_COLOR(BLACK,BLACK)|BRIGHT)
+#define RED_CHAR (MAKE_COLOR(BLUE,RED)|BRIGHT)
 #define NR_CONSOLES	3 //tty
 /* VGA */
 #define	CRTC_ADDR_REG	0x3D4	/* CRT Controller Registers - Addr Register */
@@ -36,5 +38,11 @@ typedef struct s_console
 
 extern CONSOLE console_table[NR_CONSOLES];
 extern int nr_current_console;
-
-#endif /* _ORANGES_CONSOLE_H_ */
+/* console.c */
+extern void out_char(CONSOLE* p_con, char ch);
+extern void init_screen(TTY* p_tty);
+extern void scroll_screen(CONSOLE* p_con, int direction);
+extern int is_current_console(CONSOLE* p_con);
+extern void out_str(CONSOLE* p_con, char* str);
+extern void select_console(int nr_console);
+#endif /* _CONSOLE_H_ */

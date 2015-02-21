@@ -11,8 +11,6 @@
 #include "proc.h"
 #include "tty.h"
 #include "console.h"
-#include "global.h"
-#include "proto.h"
 #include"irq.h"
 #include "keyboard.h"
 #include "keymap.h"
@@ -98,8 +96,8 @@ public void keyboard_read(TTY* p_tty)
 		
 //printf("------read::caps_lock:%x-------",caps_lock);
 		scan_code = get_byte_from_kbuf();
-		printf("scan_code:%x %d---",scan_code,scan_code);
-		printf("test:%s---","hello");
+//		printf("scan_code:%x %d---",scan_code,scan_code);
+//		printf("test:%s---","hello");
 		/* 下面开始解析扫描码 */
 		if (scan_code == 0xE1) {
 			int i;

@@ -1,18 +1,13 @@
 
-#include "type.h"
-#include "const.h"
-#include "protect.h"
-#include "proc.h"
-#include "tty.h"
 #include"irq.h"
-#include "console.h"
-#include "global.h"
-#include "proto.h"
+#include "display.h"
+#include "stdlib.h"
 
+irq_handler irq_table[NR_IRQ];
 /*======================================================================*
                             init_8259A
  *======================================================================*/
-public void init_8259A()
+void init_8259A()
 {
 	/* Master 8259, ICW1. */
 	out_byte(INT_M_CTL,	0x11);
@@ -48,10 +43,10 @@ public void init_8259A()
 
 }
 //所有中断的处理
-public void spurious_irq(int irq){
+void spurious_irq(int irq){
 	disp_str("irq:");disp_int(irq);disp_str("\n");
 }
-public void put_irq_handler(int irq,irq_handler handler){
+void put_irq_handler(int irq,irq_handler handler){
 	disable_irq(irq);
 	irq_table[irq]=handler;
 	enable_irq(irq);

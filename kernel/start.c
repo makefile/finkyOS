@@ -5,11 +5,10 @@
 #include"tty.h"
 #include"console.h"
 
-#include"proto.h"
-#include"global.h"
-
 //public void* memcpy(void* pDst,void *pSrc,int size);
 
+int disp_pos;
+u32 k_reenter;
 
 public void cstart(){
 	

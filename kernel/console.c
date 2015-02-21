@@ -1,8 +1,6 @@
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 			      console.c
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-						    Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 /*
@@ -18,10 +16,11 @@
 #include "proc.h"
 #include "tty.h"
 #include "console.h"
-#include "global.h"
 #include "keyboard.h"
-#include "proto.h"
+#include "stdlib.h"
 
+CONSOLE console_table[NR_CONSOLES];
+int nr_current_console;
 PRIVATE void set_cursor(unsigned int position);
 PRIVATE void set_video_start_addr(u32 addr);
 PRIVATE void flush(CONSOLE* p_con);
@@ -108,7 +107,7 @@ PUBLIC void out_char(CONSOLE* p_con, char ch)
 
 	flush(p_con);
 }
-PUBLIC void out_str(CONSOLE* p_con, char* str){
+void out_str(CONSOLE* p_con, char* str){
 	int len=strlen(str);
 	int i=0;
 	while(len--) out_char(p_con,str[i++]);	

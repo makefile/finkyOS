@@ -7,8 +7,8 @@ ASKF=-I include/ -f elf32
 CC=gcc
 LD=ld
 ENTRYPOINT=0x30400
-CFLAGS=-I include/ -c -fno-builtin -m32
 CF2=-fno-stack-protector
+CFLAGS=-I include/ -c -fno-builtin -m32 $(CF2)
 LDFLAGS=-s -Ttext $(ENTRYPOINT)  -m elf_i386
 BOOT:=boot/boot.asm
 LDR:=boot/loader.asm
@@ -17,13 +17,14 @@ OUT:=bin/
 BOOT_BIN:=$(OUT)$(subst .asm,.bin,$(BOOT))
 LDR_BIN:=$(OUT)$(subst .asm,.bin,$(LDR))
 KERNEL_BIN:=$(OUT)$(subst .asm,.bin,$(KERNEL))
-OBJS=$(OUT)kernel/kernel.o $(OUT)kernel/global.o $(OUT)kernel/start.o $(OUT)lib/kliba.o $(OUT)lib/string.o $(OUT)lib/cstring.o \
+OBJS=$(OUT)kernel/kernel.o  $(OUT)kernel/start.o $(OUT)lib/kliba.o $(OUT)lib/string.o $(OUT)lib/cstring.o \
 	$(OUT)kernel/protect.o $(OUT)kernel/i8259.o  $(OUT)lib/klib.o \
 	$(OUT)kernel/main.o $(OUT)kernel/proc.o  \
 	$(OUT)kernel/clock.o $(OUT)kernel/syscall.o \
 	$(OUT)kernel/keyboard.o $(OUT)kernel/tty.o \
+	$(OUT)kernel/console.o	\
 	$(OUT)kernel/vsprintf.o $(OUT)kernel/printf.o \
-	$(OUT)kernel/console.o
+	$(OUT)kernel/systask.o $(OUT)kernel/misc.o   
 
 IMG:=a.img
 MOUNTPOINT:=/mnt/usb/
@@ -58,12 +59,10 @@ bin/kernel/kernel.o : kernel/kernel.asm
 bin/kernel/syscall.o: kernel/syscall.asm
 	$(AS) $(ASKF) -o $@ $<
 
-bin/kernel/start.o: kernel/start.c include/type.h include/const.h include/protect.h \
-		include/proto.h include/string.h
+bin/kernel/start.o: kernel/start.c include/type.h include/const.h include/protect.h include/string.h
 	$(CC) $(CFLAGS) -o $@ $<
 
-bin/kernel/i8259.o : kernel/i8259.c include/type.h include/const.h include/protect.h \
-			include/proto.h
+bin/kernel/i8259.o : kernel/i8259.c include/type.h include/const.h include/protect.h 
 	$(CC) $(CFLAGS) -o $@ $<
 
 bin/kernel/global.o : kernel/global.c
@@ -88,6 +87,10 @@ bin/kernel/printf.o: kernel/printf.c
 	$(CC) $(CFLAGS) $(CF2) -o $@ $<
 bin/kernel/vsprintf.o: kernel/vsprintf.c
 	$(CC) $(CFLAGS) $(CF2) -o $@ $<
+bin/kernel/misc.o: lib/misc.c
+	$(CC) $(CFLAGS) -o $@ $<
+bin/kernel/systask.o: kernel/systask.c
+	$(CC) $(CFLAGS) -o $@ $<
 	
 bin/lib/klib.o : lib/klib.c
 	$(CC) $(CFLAGS) $(CF2) -o $@ $<

@@ -89,9 +89,9 @@ csinit:
 	;push 0
 	;popfd ;pop top of stack into EFLAGS，let EFLAGS=0
 	
-	mov	ah, 1dh ;pink/blue	; 0000: 黑底    1111: 白字
-	mov	al, 'K'
-	mov	[gs:((80 * 5 + 39) * 2)], ax	; 屏幕第 5 行, 第 39 列
+;	mov	ah, 1dh ;pink/blue	; 0000: 黑底    1111: 白字
+;	mov	al, 'K'
+;	mov	[gs:((80 * 5 + 39) * 2)], ax	; 屏幕第 5 行, 第 39 列
 	;sti;这里不必要了，上面cstart中的init_8259A已经开启了一部分硬件中断
 	xor eax,eax
 	mov ax,SELECTOR_TSS
@@ -109,7 +109,7 @@ restart: ;在main.c中被调用
 	;jmp re_enter
 re_enter: ;让重入的中断直接返回
 	dec dword [k_reenter] 
-	        
+;	hlt        
         pop gs
         pop fs
         pop es
@@ -126,9 +126,9 @@ re_enter: ;让重入的中断直接返回
         push gs ;为了不影响进程的执行，保存原寄存器，以防万一
         ;因为mov al,EOI改变了al的值
         mov dx,ss
-        mov ds,dx ;这三个为了使用调用函数等
+        mov ds,dx ;为了使用调用函数等
         mov es,dx
-             
+        mov fs,dx     
 	in al,INT_M_CTLMASK
 	or al,(1<<%1)
 	out INT_M_CTLMASK,al ;不容许再发生该中断,也就是不会再发生重入，那重入的代码也就没用了
@@ -143,7 +143,7 @@ re_enter: ;让重入的中断直接返回
         call [irq_table+4 * %1]
         pop ecx
         cli
-        
+       
         in al,INT_M_CTLMASK
 	and al,~(1<<%1)
 	out INT_M_CTLMASK,al ;容许再发生该中断
@@ -302,22 +302,33 @@ sys_call:
         push fs
         push gs ;为了不影响进程的执行，保存原寄存器，以防万一
         ;因为mov al,EOI改变了al的值
+        mov esi,edx ;保存edx，系统调用的第四个是参数
         mov dx,ss
         mov ds,dx ;这三个为了使用调用函数等
         mov es,dx
+        mov fs,dx
+        mov edx,esi ;恢复edx
         mov esi ,esp
         mov esp,StackTop ;切换到内核栈
         ;save over
+        inc dword [k_reenter]
+        cmp dword [k_reenter],0
+        jne re_enter
+        
         push esi ;sys_write调用者指针
+        push dword [p_proc_ready]
+        push edx
         push ecx
         push ebx
         
-        sti
+;        sti
         call [sys_call_table+eax*4] ;系统调用的代码要在内核栈中运行
+        add esp,16 ;4*4
+        pop esi
         mov [esi+EAXREG-P_STACKBASE],eax ;return val
-        add esp,12 ;4*3
-        cli
-        inc dword [k_reenter] 
+        
+;        cli
+       
         
         jmp restart
         

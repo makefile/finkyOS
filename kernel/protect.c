@@ -5,9 +5,16 @@
 #include "string.h"
 #include "tty.h"
 #include "console.h"
+#include"display.h" //disp_pos
+#include"syscall.h"
+#include"irq.h"
 
-#include "global.h"
-#include "proto.h"
+struct descriptor       gdt[DT_NUM];
+struct gate		idt[IDT_SIZE];
+u8 gdt_ptr[6];     /* 0~15:Limit  16~47:Base */
+u8 idt_ptr[6];     /* 0~15:Limit  16~47:Base */
+struct tss tss;
+struct proc* p_proc_ready;
 
 typedef void (*int_handler)();
 /* 本文件内函数声明 */
@@ -63,7 +70,7 @@ public u32 seg2phys(u16 seg)
 /*======================================================================*
                             init_prot
  *======================================================================*/
-public void init_prot()
+public void init_prot()//init protect mode things
 {
 	init_8259A();
 
@@ -252,10 +259,10 @@ public void exception_handler(int vec_no,int err_code,int eip,int cs,int eflags)
 
 	/* 通过打印空格的方式清空屏幕的前五行，并把 disp_pos 清零 */
 	disp_pos = 0;
-	for(i=0;i<80*5;i++){
-		disp_str(" ");
+	for(i=0;i<80*10;i++){
+	//	disp_str(" ");
 	}
-	disp_pos = 0;
+	disp_pos = 20*80;
 
 	disp_color_str("Exception! --> ", text_color);
 	disp_color_str(err_msg[vec_no], text_color);
