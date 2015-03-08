@@ -3,7 +3,7 @@
 #include"ipc.h"
 #include"protect.h" //descriptor
 /* Number of tasks */
-#define NR_TASKS 2		//number of task.ring1
+#define NR_TASKS 4		//number of task.ring1
 #define NR_PROCS 3	//ring3
 #define LDT_SIZE 2	//每个任务（进程）一个单独的LDT(内含两项cs,ds)
 
@@ -79,12 +79,15 @@ typedef struct s_task {
 /* stacks of tasks */
 #define STACK_SIZE_TTY  	0x8000
 #define STACK_SIZE_SYS  	0x8000
+#define STACK_SIZE_HD	  	0x8000
+#define STACK_SIZE_FS	  	0x8000
 #define STACK_SIZE_PROCA	0x8000 //32kB
 #define STACK_SIZE_PROCB	0x8000
 #define STACK_SIZE_PROCC	0x8000
 //极为重要，不可有偏差
 #define STACK_SIZE_TOTAL	(STACK_SIZE_TTY+ \
 				STACK_SIZE_SYS   + \
+				STACK_SIZE_HD+STACK_SIZE_FS+ \
 				STACK_SIZE_PROCA + \
 				STACK_SIZE_PROCB + \
 				STACK_SIZE_PROCC)
