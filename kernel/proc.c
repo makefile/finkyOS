@@ -200,8 +200,6 @@ PUBLIC void* va2la(int pid, void* va)
 	if (pid < NR_TASKS + NR_PROCS) {
 		assert(la == (u32)va);
 	}
-if(va==0x10){disp_str("va2la\n\n\n\n\n");
-disp_int(la);}
 	return (void*)la;
 }
 

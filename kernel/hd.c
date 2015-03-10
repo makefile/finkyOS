@@ -330,9 +330,10 @@ PRIVATE void hd_rdwt(MESSAGE * p)
 	hd_cmd_out(&cmd);
 printl("start hd_rdwt\n");
 	int bytes_left = p->CNT;
-printl("va:%x\n",p->BUF);
-	void * la = (void*)va2la(p->PROC_NR, p->BUF);
+printl("va BUF:%x\n",p->BUF);
+//	void * la = (void*)va2la(p->PROC_NR, p->BUF);
 //	void * la = (void*)va2la(p->PROC_NR, 0x10);
+	void * la=fsbuf;
 printl("la:%x\n",la);
 	while (bytes_left>0) {
 		int bytes = min(SECTOR_SIZE, bytes_left);
@@ -347,7 +348,8 @@ printl("la:%x\n",la);
 
 			port_write(REG_DATA, la, bytes);
 			printl("after port write\n");
-			interrupt_wait();
+			//interrupt_wait();
+			//printl("after interrupt_wait\n");
 		}
 		bytes_left -= SECTOR_SIZE;
 		la += SECTOR_SIZE;

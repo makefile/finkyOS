@@ -74,7 +74,21 @@ PUBLIC int is_current_console(CONSOLE* p_con)
 PUBLIC void out_char(CONSOLE* p_con, char ch)
 {
 	u8* p_vmem = (u8*)(V_MEM_BASE + p_con->cursor * 2);
-
+	//屏幕显存超出设置的大小，这里简单的将所有内容清空，从头显示
+	if (p_con->cursor >=
+		    p_con->original_addr + p_con->v_mem_limit - 1) {
+		//memset((char*)p_con->original_addr,'.',p_con->v_mem_limit*2);
+		//memset((u8*)V_MEM_BASE,' ',V_MEM_SIZE*2);
+		p_con->cursor=p_con->original_addr;
+		p_vmem = (u8*)(V_MEM_BASE );//+ p_con->cursor * 2);
+		p_con->current_start_addr =p_con->original_addr;//从头显示
+		int i;
+		for(i=0;i<V_MEM_SIZE;i++){
+			*p_vmem++ = ' ';
+			*p_vmem++ = DEFAULT_CHAR_COLOR;
+		}
+		p_vmem = (u8*)(V_MEM_BASE + p_con->cursor * 2);
+	}
 	switch(ch) {
 	case '\n':
 		if (p_con->cursor < p_con->original_addr +
@@ -82,6 +96,9 @@ PUBLIC void out_char(CONSOLE* p_con, char ch)
 			p_con->cursor = p_con->original_addr + SCREEN_WIDTH * 
 				((p_con->cursor - p_con->original_addr) /
 				 SCREEN_WIDTH + 1);
+		}else{
+			p_con->cursor=p_con->original_addr;
+			p_con->current_start_addr =p_con->original_addr;//从头显示
 		}
 		break;
 	case '\b':
@@ -98,6 +115,7 @@ PUBLIC void out_char(CONSOLE* p_con, char ch)
 			*p_vmem++ = DEFAULT_CHAR_COLOR;
 			p_con->cursor++;
 		}
+		
 		break;
 	}
 

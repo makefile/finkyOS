@@ -154,6 +154,15 @@ LABEL_GOON_LOADING_FILE:
 	add	ax, dx
 	add	ax, DeltaSectorNo
 	add	bx, [BPB_BytsPerSec]
+	jc	.1 ;如果bx重新变为0说明内核大于64KB（65535）
+	jmp	.2
+.1:
+	push ax	;es+=0x1000,es指向了下一个段
+	mov ax,es
+	add ax,1000h
+	mov es,ax
+	pop ax
+.2:
 	jmp	LABEL_GOON_LOADING_FILE
 LABEL_FILE_LOADED:
 
@@ -324,8 +333,47 @@ InitKernel:
 
         ret
 ; InitKernel ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+; ------------------------------------------------------------------------
+; 内存拷贝，仿 memcpy
+; ------------------------------------------------------------------------
+; void* MemCpy(void* es:pDest, void* ds:pSrc, int iSize);
+; ------------------------------------------------------------------------
+MemCpy:
+	push	ebp
+	mov	ebp, esp
 
-%include	"lib.inc"
+	push	esi
+	push	edi
+	push	ecx
+
+	mov	edi, [ebp + 8]	; Destination
+	mov	esi, [ebp + 12]	; Source
+	mov	ecx, [ebp + 16]	; Counter
+.1:
+	cmp	ecx, 0		; 判断计数器
+	jz	.2		; 计数器为零时跳出
+
+	mov	al, [ds:esi]		; ┓
+	inc	esi			; ┃
+					; ┣ 逐字节移动
+	mov	byte [es:edi], al	; ┃
+	inc	edi			; ┛
+
+	dec	ecx		; 计数器减一
+	jmp	.1		; 循环
+.2:
+	mov	eax, [ebp + 8]	; 返回值
+
+	pop	ecx
+	pop	edi
+	pop	esi
+	mov	esp, ebp
+	pop	ebp
+
+	ret			; 函数结束，返回
+; MemCpy 结束-------------------------------------------------------------
+
+;%include	"lib.inc"
 ; 显示内存信息 --------------------------------------------------------------
 DispMemInfo:
 	push	esi

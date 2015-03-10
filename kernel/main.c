@@ -122,7 +122,7 @@ void procB(){
 			//disp_color_str("B",BRIGHT|MAKE_COLOR(BLACK,GREEN));
 			printf("B: do you? \n");
 			//disp_str("|");
-			sleep(2);
+			sleep(1);
 		}
 }
 void procC(){
@@ -131,6 +131,6 @@ void procC(){
 //			disp_color_str("C",BRIGHT|MAKE_COLOR(BLACK,GREEN));
 			printf("C: Umm...(sleep) \n");
 			//disp_str("|");
-			sleep(3);
+			sleep(2);
 		}
 }
