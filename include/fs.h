@@ -7,8 +7,10 @@
  *****************************************************************************
  *****************************************************************************/
 
-#ifndef	_ORANGES_FS_H_
-#define	_ORANGES_FS_H_
+#ifndef	_FS_H_
+#define _FS_H_
+
+#include"type.h"
 
 /**
  * @struct dev_drv_map fs.h "include/sys/fs.h"
@@ -98,9 +100,9 @@ struct super_block {
 
 /**
  * @def   SUPER_BLOCK_SIZE
- * @brief The size of super block \b in \b the \b device.
+ * @brief The size of super block in the device.
  *
- * Note that this is the size of the struct in the device, \b NOT in memory.
+ * Note that this is the size of the struct in the device, NOT in memory.
  * The size in memory is larger because of some more members.
  */
 #define	SUPER_BLOCK_SIZE	56
@@ -114,12 +116,12 @@ struct super_block {
  *   - start_sect
  *   - nr_sects
  *
- * The \c start_sect and\c nr_sects locate the file in the device,
+ * The start_sect and nr_sects locate the file in the device,
  * and the size show how many bytes is used.
- * If <tt> size < (nr_sects * SECTOR_SIZE) </tt>, the rest bytes
+ * If size < (nr_sects * SECTOR_SIZE), the rest bytes
  * are wasted and reserved for later writing.
  *
- * \b NOTE: Remember to change INODE_SIZE if the members are changed
+ * NOTE: Remember to change INODE_SIZE if the members are changed
  */
 struct inode {
 	u32	i_mode;		/**< Accsess mode. Unused currently */
@@ -142,6 +144,24 @@ struct inode {
  * The size in memory is larger because of some more members.
  */
 #define	INODE_SIZE	32
+#define	MAX_FILENAME_LEN	12
+
+/**
+ * @struct dir_entry
+ * @brief  Directory Entry
+ */
+struct dir_entry {
+	int	inode_nr;		/**< inode nr. */
+	char	name[MAX_FILENAME_LEN];	/**< Filename */
+};
+
+/**
+ * @def   DIR_ENTRY_SIZE
+ * @brief The size of directory entry in the device.
+ *
+ * It is as same as the size in memory.
+ */
+#define	DIR_ENTRY_SIZE	sizeof(struct dir_entry)
 
 /**
  * @struct file_desc
@@ -153,6 +173,10 @@ struct file_desc {
 	struct inode*	fd_inode;	/**< Ptr to the i-node */
 };
 
+/*buffer for FS:5M~6M
+*/
+extern	u8* fsbuf;
+extern	const int	FSBUF_SIZE;
 
 /**
  * Since all invocations of `rw_sector()' in FS look similar (most of the
@@ -168,12 +192,37 @@ struct file_desc {
 				       SECTOR_SIZE, /* read one sector */ \
 				       TASK_FS,				\
 				       fsbuf);
-#define WR_SECT(dev,sect_nr) rw_sector(DEV_WRITE, \
-				       dev,				\
-				       (sect_nr) * SECTOR_SIZE,		\
+#define WR_SECT(dev,sect_nr) do{ \
+				printl("fsbuf=%x\n",fsbuf); \
+				rw_sector(DEV_WRITE,  dev, \
+				       (sect_nr) * SECTOR_SIZE, \
 				       SECTOR_SIZE, /* write one sector */ \
-				       TASK_FS,				\
-				       fsbuf);
+				       TASK_FS,	\
+				       fsbuf); \
+				}while(0);
 
+/* make device number from major and minor numbers */
+#define	MAJOR_SHIFT		8
+#define	MAKE_DEV(a,b)		((a << MAJOR_SHIFT) | b)
+/* separate major and minor numbers from device number */
+#define	MAJOR(x)		((x >> MAJOR_SHIFT) & 0xFF)
+#define	MINOR(x)		(x & 0xFF)
+
+#define INVALID_DRIVER	-20
+#define	INVALID_INODE	0
+#define ROOT_INODE              1
+
+/* INODE::i_mode (octal, lower 12 bits reserved) */
+#define I_TYPE_MASK     0170000
+#define I_REGULAR       0100000
+#define I_BLOCK_SPECIAL 0060000
+#define I_DIRECTORY     0040000
+#define I_CHAR_SPECIAL  0020000
+#define I_NAMED_PIPE	0010000
+
+#define	is_special(m)	((((m) & I_TYPE_MASK) == I_BLOCK_SPECIAL) ||	\
+			 (((m) & I_TYPE_MASK) == I_CHAR_SPECIAL))
+
+#define	NR_DEFAULT_FILE_SECTS	2048 /* 2048 * 512 = 1MB */
 	
 #endif /* _ORANGES_FS_H_ */

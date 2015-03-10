@@ -176,19 +176,21 @@ public void keyboard_read(TTY* p_tty)
 				break;
 			case CTRL_L:
 				ctrl_l = make;
+				//printf("-----CTRL_L:%x ",make);
 				break;
 			case CTRL_R:
 				ctrl_r = make;
 				break;
 			case ALT_L:
 				alt_l = make;
+				//printf("-----ALT_L:%x ",make);
 				break;
 			case ALT_R:
 				alt_l = make;
 				break;
 			case CAPS_LOCK:
 				if (make) {
-//				printf("-----CAPS down before:%x",caps_lock);
+//				
 					caps_lock   = !caps_lock;
 					set_leds();
 				}

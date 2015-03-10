@@ -3,7 +3,7 @@
 #include"ipc.h"
 #include"protect.h" //descriptor
 /* Number of tasks */
-#define NR_TASKS 4		//number of task.ring1
+#define NR_TASKS 4	//number of task.ring1
 #define NR_PROCS 3	//ring3
 #define LDT_SIZE 2	//每个任务（进程）一个单独的LDT(内含两项cs,ds)
 
@@ -73,6 +73,10 @@ typedef struct s_task {
 
 #define TASK_TTY	0 //pid
 #define TASK_SYS	1
+#define TASK_HD		2
+#define TASK_FS		3
+#define TASK_MM		4
+
 #define proc2pid(x) (x - proc_table)
 #define FIRST_PROC	proc_table[0]
 #define LAST_PROC	proc_table[NR_TASKS + NR_PROCS - 1]
@@ -105,6 +109,8 @@ extern TASK user_task_table[];
 
 extern void task_tty();
 extern void task_sys();
+extern void task_hd();
+extern void task_fs();
 extern	void*	va2la(int pid, void* va);
 #define INDEX_LDT_RW 1
 extern	int	ldt_seg_linear(struct proc* p, int idx);

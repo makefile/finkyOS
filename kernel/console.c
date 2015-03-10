@@ -49,7 +49,7 @@ PUBLIC void init_screen(TTY* p_tty)
 		disp_pos = 0;
 	}
 	else {
-		out_str(p_tty->p_console,"Welcome to fyk's OS tty");
+		out_str(p_tty->p_console,"Welcome to finkyOS tty");
 		out_char(p_tty->p_console, nr_tty + '1');
 		out_char(p_tty->p_console, '\n');
 		out_char(p_tty->p_console, '#');
@@ -156,6 +156,7 @@ PRIVATE void set_video_start_addr(u32 addr)
  *======================================================================*/
 PUBLIC void select_console(int nr_console)	/* 0 ~ (NR_CONSOLES - 1) */
 {
+	//out_str(&console_table[nr_console]," select:");out_char(&console_table[nr_console],nr_console+'0');
 	if ((nr_console < 0) || (nr_console >= NR_CONSOLES)) {
 		return;
 	}

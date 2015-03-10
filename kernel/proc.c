@@ -13,11 +13,15 @@
 #include"assert.h"
 #include"syscall.h"
 #include"misc.h"
+#include"ipc.h"
 #include"string.h"
 #define STR_DEFAULT_LEN 1024
 char task_stack[STACK_SIZE_TOTAL];
 TASK task_table[NR_TASKS]={{task_tty,STACK_SIZE_TTY,"tty"},
-				{task_sys,STACK_SIZE_SYS,"sys"}};
+			{task_sys,STACK_SIZE_SYS,"sys"} ,
+			{task_hd,STACK_SIZE_HD,"hd"},
+			{task_fs,STACK_SIZE_FS,"fs"}
+			};
 TASK user_task_table[NR_PROCS]={{procA,STACK_SIZE_PROCA,"procA"},
 			   {procB,STACK_SIZE_PROCB,"procB"},
 			   {procC,STACK_SIZE_PROCC,"procC"}
@@ -190,14 +194,14 @@ PUBLIC int ldt_seg_linear(PROCESS* p, int idx)
 PUBLIC void* va2la(int pid, void* va)
 {
 	PROCESS* p = &proc_table[pid];
-
 	u32 seg_base = ldt_seg_linear(p, INDEX_LDT_RW);
 	u32 la = seg_base + (u32)va;
 
 	if (pid < NR_TASKS + NR_PROCS) {
 		assert(la == (u32)va);
 	}
-
+if(va==0x10){disp_str("va2la\n\n\n\n\n");
+disp_int(la);}
 	return (void*)la;
 }
 
@@ -605,3 +609,35 @@ PUBLIC void dump_msg(const char * title, MESSAGE* m)
 		);
 }
 
+/*****************************************************************************
+ *                                inform_int
+ *****************************************************************************/
+/**
+ * <Ring 0> Inform a proc that an interrupt has occured.
+ * 
+ * @param task_nr  The task which will be informed.
+ *****************************************************************************/
+void inform_int(int task_nr)
+{
+	struct proc* p = proc_table + task_nr;
+
+	if ((p->p_flags & RECEIVING) && /* dest is waiting for the msg */
+	    ((p->p_recvfrom == INTERRUPT) || (p->p_recvfrom == ANY))) {
+		p->p_msg->source = INTERRUPT;
+		p->p_msg->type = HARD_INT;
+		p->p_msg = 0;
+		p->has_int_msg = 0;
+		p->p_flags &= ~RECEIVING; /* dest has received the msg */
+		p->p_recvfrom = NO_TASK;
+		assert(p->p_flags == 0);
+		unblock(p);
+
+		assert(p->p_flags == 0);
+		assert(p->p_msg == 0);
+		assert(p->p_recvfrom == NO_TASK);
+		assert(p->p_sendto == NO_TASK);
+	}
+	else {
+		p->has_int_msg = 1;
+	}
+}

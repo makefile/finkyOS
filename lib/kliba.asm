@@ -14,6 +14,8 @@ global	enable_irq
 global	disable_irq
 global	enable_int
 global	disable_int
+global	port_read
+global	port_write
 
 %include "sconst.inc"
 ; ========================================================================
@@ -109,6 +111,30 @@ in_byte:
 	nop	; 一点延迟
 	nop
 	ret
+; ========================================================================
+;                  void port_read(u16 port, void* buf, int n);
+; ========================================================================
+port_read:
+	mov	edx, [esp + 4]		; port
+	mov	edi, [esp + 4 + 4]	; buf
+	mov	ecx, [esp + 4 + 4 + 4]	; n
+	shr	ecx, 1
+	cld
+	rep	insw
+	ret
+
+; ========================================================================
+;                  void port_write(u16 port, void* buf, int n);
+; ========================================================================
+port_write:
+	mov	edx, [esp + 4]		; port
+	mov	esi, [esp + 4 + 4]	; buf
+	mov	ecx, [esp + 4 + 4 + 4]	; n
+	shr	ecx, 1
+	cld
+	rep	outsw
+	ret
+
 ; ========================================================================
 ;		   void disable_irq(int irq);
 ; ========================================================================

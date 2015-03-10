@@ -17,16 +17,16 @@ OUT:=bin/
 BOOT_BIN:=$(OUT)$(subst .asm,.bin,$(BOOT))
 LDR_BIN:=$(OUT)$(subst .asm,.bin,$(LDR))
 KERNEL_BIN:=$(OUT)$(subst .asm,.bin,$(KERNEL))
+#OBJS=$(OUT)*/*.o
 OBJS=$(OUT)kernel/kernel.o  $(OUT)kernel/start.o $(OUT)lib/kliba.o $(OUT)lib/string.o $(OUT)lib/cstring.o \
 	$(OUT)kernel/protect.o $(OUT)kernel/i8259.o  $(OUT)lib/klib.o \
-	$(OUT)kernel/main.o $(OUT)kernel/proc.o  \
-	$(OUT)kernel/clock.o $(OUT)kernel/syscall.o \
-	$(OUT)kernel/keyboard.o $(OUT)kernel/tty.o \
-	$(OUT)kernel/console.o	\
-	$(OUT)kernel/vsprintf.o $(OUT)kernel/printf.o \
-	$(OUT)kernel/systask.o $(OUT)kernel/misc.o   
+	$(OUT)kernel/main.o $(OUT)kernel/proc.o  $(OUT)kernel/clock.o \
+	$(OUT)kernel/syscall.o $(OUT)kernel/keyboard.o $(OUT)kernel/tty.o \
+	$(OUT)kernel/console.o $(OUT)kernel/vsprintf.o $(OUT)kernel/printf.o \
+	$(OUT)kernel/systask.o $(OUT)kernel/misc.o \
+	$(OUT)kernel/hd.o $(OUT)kernel/task.o  $(OUT)fs/main.o 
 
-IMG:=a.img
+IMG:=bochs/a.img
 MOUNTPOINT:=/mnt/usb/
 
 .PHONY : x all cp clean um img #not file obj
@@ -58,6 +58,7 @@ bin/kernel/kernel.o : kernel/kernel.asm
 	$(AS) $(ASKF) -o $@ $<
 bin/kernel/syscall.o: kernel/syscall.asm
 	$(AS) $(ASKF) -o $@ $<
+#%.o : %.c 
 
 bin/kernel/start.o: kernel/start.c include/type.h include/const.h include/protect.h include/string.h
 	$(CC) $(CFLAGS) -o $@ $<
@@ -91,6 +92,10 @@ bin/kernel/misc.o: lib/misc.c
 	$(CC) $(CFLAGS) -o $@ $<
 bin/kernel/systask.o: kernel/systask.c
 	$(CC) $(CFLAGS) -o $@ $<
+bin/kernel/hd.o: kernel/hd.c
+	$(CC) $(CFLAGS) -o $@ $<
+bin/kernel/task.o: kernel/task.c
+	$(CC) $(CFLAGS) -o $@ $<
 	
 bin/lib/klib.o : lib/klib.c
 	$(CC) $(CFLAGS) $(CF2) -o $@ $<
@@ -101,6 +106,8 @@ bin/lib/kliba.o : lib/kliba.asm
 bin/lib/string.o : lib/string.asm
 	$(AS) $(ASKF) -o $@ $<
 bin/lib/cstring.o: lib/string.c
+	$(CC) $(CFLAGS)  -o $@ $<
+bin/fs/main.o: fs/main.c
 	$(CC) $(CFLAGS)  -o $@ $<
 
 um:

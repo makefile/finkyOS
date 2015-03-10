@@ -191,10 +191,45 @@ hwint07:                ; Interrupt routine for irq 7 (printer)
 
 ; ---------------------------------
 %macro  hwint_slave     1
-        push    %1
-        call    spurious_irq
-        add     esp, 4
-        hlt
+	pushad ;a,c,d,b,esp,ebp,esi,edi
+        push ds
+        push es
+        push fs
+        push gs ;为了不影响进程的执行，保存原寄存器，以防万一
+        ;因为mov al,EOI改变了al的值
+        mov esi,edx ;保存edx，系统调用的第四个是参数
+        mov dx,ss
+        mov ds,dx ;这三个为了使用调用函数等
+        mov es,dx
+        mov fs,dx
+        mov edx,esi ;恢复edx
+        mov esi ,esp
+        mov esp,StackTop ;切换到内核栈
+        ;save over
+	in al,INT_S_CTLMASK
+	or al,(1<<(%1-8))
+	out INT_S_CTLMASK,al ;不容许再发生该中断
+	
+        mov al,EOI ;reenable master 8259
+        out INT_M_CTL,al ;将EOI位置1,告诉8259A当前中断结束，否则不再发生时钟中断
+        nop
+	out INT_S_CTL,al
+	mov esp,StackTop ;切换到内核栈
+
+        sti ;CPU在响应中断的过程中会自动关中断，下面的操作可能很耗时，应该容许其他中断的发生，如键盘响应等。
+        push %1
+        call [irq_table+4 * %1]
+        pop ecx
+        cli
+       
+        in al,INT_S_CTLMASK
+	and al,~(1<<(%1-8))
+	out INT_S_CTLMASK,al ;容许再发生该中断
+	
+	inc dword [k_reenter]
+        cmp dword [k_reenter],0
+        jne re_enter
+        jmp restart
 %endmacro
 ; ---------------------------------
 
@@ -296,6 +331,12 @@ exception:
 				;堆栈中从顶向下依次是：EIP、CS、EFLAGS
 	hlt
 sys_call:
+	inc dword [k_reenter]
+        cmp dword [k_reenter],0
+        je .sys_call_next
+        dec dword [k_reenter]
+        iretd
+.sys_call_next:
 	pushad ;a,c,d,b,esp,ebp,esi,edi
         push ds
         push es
@@ -311,9 +352,9 @@ sys_call:
         mov esi ,esp
         mov esp,StackTop ;切换到内核栈
         ;save over
-        inc dword [k_reenter]
-        cmp dword [k_reenter],0
-        jne re_enter
+;        inc dword [k_reenter]
+;        cmp dword [k_reenter],0
+;        jne re_enter
         
         push esi ;sys_write调用者指针
         push dword [p_proc_ready]
@@ -329,6 +370,5 @@ sys_call:
         
 ;        cli
        
-        
         jmp restart
         

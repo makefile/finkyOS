@@ -109,33 +109,28 @@ void procA(){
 	int i;
 	//disp_pos=0;
 		while(1){
-			//disp_int(get_ticks());
 			//disp_color_str("A",BRIGHT|MAKE_COLOR(BLACK,GREEN));
-			printf("A ticks:%d ",get_ticks());//
-			//disp_int(get_ticks());
-			//disp_str("|");
-			for(i=0;i<1000;i++) get_ticks();
-			delay(1);
-			//milli_delay(1000);
-			//sleep(1);//用milli_delay,sleep等系统调用，Page Fault
+			printf("A ticks:%d    ",get_ticks());//
+			//delay(1);
+			milli_delay(1000);
+			//sleep(1);
 		}
 }
 void procB(){
 	//int i=0x100;
 		while(1){
 			//disp_color_str("B",BRIGHT|MAKE_COLOR(BLACK,GREEN));
-			printf("B ");
+			printf("B: do you? \n");
 			//disp_str("|");
-			//sleep(2);
-			delay(2);
+			sleep(2);
 		}
 }
 void procC(){
 	//int i=0x1000;
 		while(1){
 //			disp_color_str("C",BRIGHT|MAKE_COLOR(BLACK,GREEN));
-			printf("C ");
+			printf("C: Umm...(sleep) \n");
 			//disp_str("|");
-			delay(3);
+			sleep(3);
 		}
 }

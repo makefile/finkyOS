@@ -87,7 +87,7 @@ PUBLIC void in_process(TTY* p_tty, u32 key)
 		case F2:
 		case F3:
 		case F4:
-		
+		case F5:
 		case F6:
 		case F7:
 		case F8:
@@ -96,12 +96,14 @@ PUBLIC void in_process(TTY* p_tty, u32 key)
 		case F11:
 		case F12:
 			/* Alt + F1~F12 */
-			if ((key & FLAG_ALT_L) || (key & FLAG_ALT_R)) {
+			//if ((key & FLAG_ALT_L) || (key & FLAG_ALT_R)) {
+			//	select_console(raw_code - F1);
+			//}
+			/* Ctrl + F1~F12 ,由于某些键与宿主系统的快捷键有冲突，因此测试时看情况*/
+			//if ((key & FLAG_CTRL_L) || (key & FLAG_CTRL_R)) {
 				select_console(raw_code - F1);
-			}
+			//}
 			break;
-		case F5:
-			select_console(1);
                 default:
                         break;
                 }

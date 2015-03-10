@@ -240,6 +240,12 @@ struct part_info {
 	u32	size;	/* how many sectors in this partition (NOT byte size, but SECTOR number) */
 };
 
+#define MAX_DRIVES              2
+#define NR_PART_PER_DRIVE       4
+#define NR_SUB_PER_PART         16
+#define NR_SUB_PER_DRIVE        (NR_SUB_PER_PART * NR_PART_PER_DRIVE)
+#define NR_PRIM_PER_DRIVE       (NR_PART_PER_DRIVE + 1)
+
 /* main drive struct, one entry per drive */
 struct hd_info
 {
@@ -254,7 +260,7 @@ struct hd_info
 	struct part_info	logical[NR_SUB_PER_DRIVE];
 };
 
-
+#define	DIOCTL_GET_GEO	1 //type
 /***************/
 /* DEFINITIONS */
 /***************/
@@ -267,6 +273,34 @@ struct hd_info
 #define	MAKE_DEVICE_REG(lba,drv,lba_highest) (((lba) << 6) |		\
 					      ((drv) << 4) |		\
 					      (lba_highest & 0xF) | 0xA0)
+/* Hard Drive */
+#define SECTOR_SIZE             512
+#define SECTOR_BITS             (SECTOR_SIZE * 8)
+#define SECTOR_SIZE_SHIFT       9
 
+/**
+224  * @def MAX_PRIM
+225  * Defines the max minor number of the primary partitions.
+226  * If there are 2 disks, prim_dev ranges in hd[0-9], this macro will
+227  * equals 9.
+228  */
+#define MAX_PRIM                (MAX_DRIVES * NR_PRIM_PER_DRIVE - 1)
+#define MAX_SUBPARTITIONS       (NR_SUB_PER_DRIVE * MAX_DRIVES)
+/* device numbers of hard disk */
+ #define MINOR_hd1a              0x10
+ #define MINOR_hd2a              (MINOR_hd1a+NR_SUB_PER_PART)
+#define	P_PRIMARY	0
+#define	P_EXTENDED	1
+//#define ORANGES_PART	0x99	/* finkyOS partition */
+#define NO_PART		0x00	/* unused entry */
+#define EXT_PART	0x05	/* extended partition */
+/* major device numbers (corresponding to fs/main.c::dd_map[]) */
+#define	NO_DEV			0
+#define	DEV_FLOPPY		1
+#define	DEV_CDROM		2
+#define	DEV_HD			3
+#define	DEV_CHAR_TTY		4
+#define	DEV_SCSI		5 
+#define ROOT_DEV                MAKE_DEV(DEV_HD, MINOR_BOOT)
 
 #endif /* _ORANGES_HD_H_ */
