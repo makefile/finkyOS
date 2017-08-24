@@ -2,8 +2,8 @@
  *****************************************************************************
  * @file   hd.c
  * @brief  HD driver.
- * @author Forrest Y. Yu
- * @date   2005~2008
+ * @author 
+ * @date   2015
  *****************************************************************************
  *****************************************************************************/
 
@@ -34,8 +34,8 @@ PRIVATE void	print_hdinfo		(struct hd_info * hdi);
 PRIVATE	u8	hd_status;
 PRIVATE	u8	hdbuf[SECTOR_SIZE * 2];
 void hd_handler(int irq);
-PRIVATE	u8		hd_status;
-PRIVATE	u8		hdbuf[SECTOR_SIZE * 2];
+//PRIVATE	u8		hd_status;
+//PRIVATE	u8		hdbuf[SECTOR_SIZE * 2];
 PRIVATE	struct hd_info	hd_info[1];
 
 #define	DRV_OF_DEV(dev) (dev <= MAX_PRIM ? \
@@ -214,8 +214,10 @@ PRIVATE void hd_cmd_out(struct hd_cmd* cmd)
  *****************************************************************************/
 PRIVATE void interrupt_wait()
 {
+//printl("inter interrupt_wait\n");
 	MESSAGE msg;
 	send_recv(RECEIVE, INTERRUPT, &msg);
+//printl("exit interrupt_wait\n");
 }
 
 /*****************************************************************************
@@ -330,11 +332,12 @@ PRIVATE void hd_rdwt(MESSAGE * p)
 	hd_cmd_out(&cmd);
 printl("start hd_rdwt\n");
 	int bytes_left = p->CNT;
-printl("va BUF:%x\n",p->BUF);
-//	void * la = (void*)va2la(p->PROC_NR, p->BUF);
+	//__asm__("hlt");
+//printl("va BUF:%x\n",p->BUF);
+	void * la = (void*)va2la(p->PROC_NR, p->BUF);
 //	void * la = (void*)va2la(p->PROC_NR, 0x10);
-	void * la=fsbuf;
-printl("la:%x\n",la);
+//	void * la=fsbuf;
+//printl("la:%x\n",la);
 	while (bytes_left>0) {
 		int bytes = min(SECTOR_SIZE, bytes_left);
 		if (p->type == DEV_READ) {
@@ -347,14 +350,14 @@ printl("la:%x\n",la);
 				panic("hd writing error.");
 
 			port_write(REG_DATA, la, bytes);
-			printl("after port write\n");
+			//printl("after port write\n");
 			//interrupt_wait();
 			//printl("after interrupt_wait\n");
 		}
 		bytes_left -= SECTOR_SIZE;
 		la += SECTOR_SIZE;
 	}
-printl("hd_rdwt end\n");
+//printl("hd_rdwt end\n");
 }															
 
 
@@ -453,7 +456,7 @@ PRIVATE void partition(int device, int style)
 			if (part_tbl[i].sys_id == EXT_PART) /* extended */
 				partition(device + dev_nr, P_EXTENDED);
 		}
-		assert(nr_prim_parts != 0);
+		//assert(nr_prim_parts != 0);
 	}
 	else if (style == P_EXTENDED) {
 		int j = device % NR_PRIM_PER_DRIVE; /* 1~4 */

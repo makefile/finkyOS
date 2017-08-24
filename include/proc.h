@@ -20,7 +20,7 @@ typedef struct s_stackframe {	/* proc_ptr points here				↑ Low			*/
 	u32	edx;		/* ┃						│			*/
 	u32	ecx;		/* ┃						│			*/
 	u32	eax;		/* ┛						│			*/
-	//u32	retaddr;	/* return address for assembly code save()	│			*/
+	u32	retaddr;	/* return address for assembly code save()	│			*/
 	u32	eip;		/*  ┓						│			*/
 	u32	cs;		/*  ┃						│			*/
 	u32	eflags;		/*  ┣ these are pushed by CPU during interrupt	│			*/
@@ -89,12 +89,15 @@ typedef struct s_task {
 #define STACK_SIZE_PROCB	0x8000
 #define STACK_SIZE_PROCC	0x8000
 //极为重要，不可有偏差
+/*
 #define STACK_SIZE_TOTAL	(STACK_SIZE_TTY+ \
 				STACK_SIZE_SYS   + \
 				STACK_SIZE_HD+STACK_SIZE_FS+ \
 				STACK_SIZE_PROCA + \
 				STACK_SIZE_PROCB + \
 				STACK_SIZE_PROCC)
+*/
+#define STACK_SIZE_TOTAL 7*0x8000
 extern void procA();
 extern void procB();
 extern void procC();

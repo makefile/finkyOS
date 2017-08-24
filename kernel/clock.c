@@ -25,11 +25,21 @@ int get_ticks(){
 
 //时钟中断处理程序，这里进行进程调度
 void clock_handler(int irq){
-	ticks++;
+/*	ticks++;
 	p_proc_ready->ticks--;
 	if(k_reenter>=0) return;//,重入，直接返回，跟上面两语句的顺序不应该反了
 	if(p_proc_ready->ticks>0) return;//指定的时间片还没运行完，不进行进程切换，这样减少频繁调度。
-	
+*/
+	if (++ticks >= MAX_TICKS)
+                ticks = 0;
+    	if (p_proc_ready->ticks)  p_proc_ready->ticks--;
+    	else return;
+//    if (key_pressed)
+//              inform_int(TASK_TTY);
+	if (k_reenter != 0) {
+            return;
+      	}
+
 	schedule();
 //asm("hlt");
 //disp_str(".clock.");
@@ -38,7 +48,7 @@ void init_clock(){
 	//init 8253可编程中断定时器
 	out_byte(TIMER_MODE ,RATE_GENERATOR);
 	out_byte(TIMER0,(u8)(TIMER_FREQ/HZ));
-	out_byte(TIMER0 ,(u8)(TIMER_FREQ/HZ));
+        out_byte(TIMER0, (u8) ((TIMER_FREQ/HZ) >> 8));
 	put_irq_handler(CLOCK_IRQ,clock_handler);//设置时钟中断处理程序
 }
 void milli_delay(int m_sec){

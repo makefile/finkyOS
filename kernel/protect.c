@@ -221,7 +221,7 @@ private void init_descriptor(DESCRIPTOR * p_desc, u32 base, u32 limit, u16 attri
 	p_desc->base_mid		= (base >> 16) & 0x0FF;		// 段基址 2		(1 字节)
 	p_desc->attr1			= attribute & 0xFF;		// 属性 1
 	p_desc->limit_high_attr2	= ((limit >> 16) & 0x0F) |
-						(attribute >> 8) & 0xF0;// 段界限 2 + 属性 2
+						((attribute >> 8) & 0xF0);// 段界限 2 + 属性 2
 	p_desc->base_high		= (base >> 24) & 0x0FF;		// 段基址 3		(1 字节)
 }
 
@@ -232,7 +232,7 @@ private void init_descriptor(DESCRIPTOR * p_desc, u32 base, u32 limit, u16 attri
  *======================================================================*/
 public void exception_handler(int vec_no,int err_code,int eip,int cs,int eflags)
 {
-	int i;
+	//int i;
 	int text_color = 0x74; /* 灰底红字 */
 
 	char * err_msg[] = {"#DE Divide Error",

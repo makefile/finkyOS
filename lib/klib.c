@@ -45,6 +45,7 @@ public char * itoa(char * str, int num)
 
 	return str;
 }
+/*my func,has some problem
 char* itoad(char* str,int num){
 	char* p=str;
 	int left;
@@ -63,6 +64,7 @@ char* itoad(char* str,int num){
 	else str_rev(&str[1]);
 	return str;
 }
+*/
 /*======================================================================*
                                disp_int
  *======================================================================*/

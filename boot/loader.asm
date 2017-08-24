@@ -1,4 +1,4 @@
-org  200h ;告诉编译器将本程序放到200h偏移处,自己定的但要和load.inc中的OffsetOfLoader一样，经过多次试验发现10h等不行，可能得是256的倍数才行，100h可以
+org  100h ;告诉编译器将本程序放到200h偏移处,自己定的但要和load.inc中的OffsetOfLoader一样，经过多次试验发现10h等不行，可能得是256的倍数才行，100h可以
 
 	jmp	short LABEL_START		; Start
 
@@ -7,7 +7,7 @@ org  200h ;告诉编译器将本程序放到200h偏移处,自己定的但要和l
 %include	"pm.inc"
 %include	"load.inc"
 
-BaseOfStack		equ	0200h
+BaseOfStack		equ	0100h
 ;PageDirBase	equ	100000h	; 页目录开始地址: 1M
 ;PageTblBase	equ	101000h	; 页表开始地址:   1M + 4K
 ; GDT

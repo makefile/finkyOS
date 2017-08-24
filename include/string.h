@@ -4,7 +4,7 @@ void* memcpy(void* dst,void *src,int size);
 void  memset(void* dst,char ch,int size);
 void* strcpy(void* dst,void* src);
 int strlen(char* str);
-void str_rev(char*str);
+//void str_rev(char*str);
 /**
  * `phys_copy' and `phys_set' are used only in the kernel, where segments
  * are all flat (based on 0). In the meanwhile, currently linear address

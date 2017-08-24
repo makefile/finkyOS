@@ -8,7 +8,7 @@ CC=gcc
 LD=ld
 ENTRYPOINT=0x30400
 CF2=-fno-stack-protector
-CFLAGS=-I include/ -c -fno-builtin -m32 $(CF2)
+CFLAGS=-I include/ -c -fno-builtin -m32 $(CF2) -Wall -Wno-implicit-function-declaration
 LDFLAGS=-s -Ttext $(ENTRYPOINT)  -m elf_i386
 BOOT:=boot/boot.asm
 LDR:=boot/loader.asm
@@ -47,6 +47,10 @@ img:
 	@dd if=/dev/zero of=$(IMG) bs=512 count=2880
 clean :
 	rm -f $(OBJS)
+allclean :
+	rm -f $(OBJS) bin/boot/*
+dir:
+	@mkdir -p bin/boot bin/kernel bin/fs bin/lib 2> /dev/null
 $(BOOT_BIN) : $(BOOT) boot/include/load.inc boot/include/fat12hdr.inc
 	$(AS) $(ASFLAGS) $< -o $@
 $(LDR_BIN) : $(LDR)

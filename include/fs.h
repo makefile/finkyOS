@@ -175,31 +175,10 @@ struct file_desc {
 
 /*buffer for FS:5M~6M
 */
-extern	u8* fsbuf;
-extern	const int	FSBUF_SIZE;
-
-/**
- * Since all invocations of `rw_sector()' in FS look similar (most of the
- * params are the same), we use this macro to make code more readable.
- *
- * Before I wrote this macro, I found almost every rw_sector invocation
- * line matchs this emacs-style regex:
- * `rw_sector(\([-a-zA-Z0-9_>\ \*()+.]+,\)\{3\}\ *SECTOR_SIZE,\ *TASK_FS,\ *fsbuf)'
- */
-#define RD_SECT(dev,sect_nr) rw_sector(DEV_READ, \
-				       dev,				\
-				       (sect_nr) * SECTOR_SIZE,		\
-				       SECTOR_SIZE, /* read one sector */ \
-				       TASK_FS,				\
-				       fsbuf);
-#define WR_SECT(dev,sect_nr) do{ \
-				printl("fsbuf=%x\n",fsbuf); \
-				rw_sector(DEV_WRITE,  dev, \
-				       (sect_nr) * SECTOR_SIZE, \
-				       SECTOR_SIZE, /* write one sector */ \
-				       TASK_FS,	\
-				       fsbuf); \
-				}while(0);
+//extern	u8* fsbuf;
+//extern	const int	FSBUF_SIZE;
+#define FSBUF 0x500000
+#define FSBUF_SIZE 0x100000
 
 /* make device number from major and minor numbers */
 #define	MAJOR_SHIFT		8

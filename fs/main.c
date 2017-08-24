@@ -1,9 +1,5 @@
 /*************************************************************************//**
- *****************************************************************************
- * @file   main.c
- * @brief  
- * @author Forrest Y. Yu
- * @date   2007
+ 
  *****************************************************************************
  *****************************************************************************/
 
@@ -24,8 +20,29 @@ PRIVATE void init_fs();
 PRIVATE void mkfs();
 
 //5M~6M,self define,low level memory management
-u8* fsbuf=(u8*)0xF00000;
-const int FSBUF_SIZE=0x100000;
+u8* fsbuf=(u8*)FSBUF;//0x500000;
+//const int FSBUF_SIZE=0x100000;
+/**
+ * Since all invocations of `rw_sector()' in FS look similar (most of the
+ * params are the same), we use this macro to make code more readable.
+ *
+ * Before I wrote this macro, I found almost every rw_sector invocation
+ * line matchs this emacs-style regex:
+ * `rw_sector(\([-a-zA-Z0-9_>\ \*()+.]+,\)\{3\}\ *SECTOR_SIZE,\ *TASK_FS,\ *fsbuf)'
+ */
+ //奇怪的事：给rw_sector再添加个参数fsbuf,传进去会变成别的值，猜测是哪越界，将rw_sector的参数区域修改了。
+#define RD_SECT(dev,sect_nr) rw_sector(DEV_READ, \
+				       dev,				\
+				       (sect_nr) * SECTOR_SIZE,		\
+				       SECTOR_SIZE, /* read one sector */ \
+				       TASK_FS);
+#define WR_SECT(dev,sect_nr) do{ \
+				rw_sector(DEV_WRITE,  dev, \
+				       (sect_nr) * SECTOR_SIZE, \
+				       SECTOR_SIZE, /* write one sector */ \
+				       TASK_FS); \
+				}while(0);
+				
 /*****************************************************************************
  *                                task_fs
  *****************************************************************************/
@@ -132,7 +149,7 @@ PRIVATE void mkfs()
 
 	/* write the super block */
 	WR_SECT(ROOT_DEV, 1);
-printl("there\n");
+/*printl("there\n");
 	printl("devbase:0x%x00, sb:0x%x00, imap:0x%x00, smap:0x%x00\n"
 	       "        inodes:0x%x00, 1st_sector:0x%x00\n", 
 	       geo.base * 2,
@@ -141,7 +158,7 @@ printl("there\n");
 	       (geo.base + 1 + 1 + sb.nr_imap_sects) * 2,
 	       (geo.base + 1 + 1 + sb.nr_imap_sects + sb.nr_smap_sects) * 2,
 	       (geo.base + sb.n_1st_sect) * 2);
-
+*/
 	/************************/
 	/*       inode map      */
 	/************************/
@@ -238,21 +255,21 @@ printl("there\n");
  * 
  * @return Zero if success.
  *****************************************************************************/
-PUBLIC int rw_sector(int io_type, int dev, u64 pos, int bytes, int proc_nr,
-		     void* buf)
+PUBLIC int rw_sector(int io_type, int dev, u64 pos, int bytes, int proc_nr)//,
+		    // void* fsbuf)
 {
 	MESSAGE driver_msg;
-printl("rw_sector--BUF:%x\n",buf);
+printl("*rw_sector--BUF:%x\n",fsbuf);
 	driver_msg.type		= io_type;
 	driver_msg.DEVICE	= MINOR(dev);
 	driver_msg.POSITION	= pos;
-	driver_msg.BUF		= buf;
+	driver_msg.BUF		= fsbuf; //--my-------------------------
 	driver_msg.CNT		= bytes;
 	driver_msg.PROC_NR	= proc_nr;
 	assert(dd_map[MAJOR(dev)].driver_nr != INVALID_DRIVER);
 
 	send_recv(BOTH, dd_map[MAJOR(dev)].driver_nr, &driver_msg);
-printl("rw_sector end\n");
+//printl("rw_sector end\n");
 	return 0;
 }
 

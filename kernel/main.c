@@ -67,7 +67,7 @@ public int kernel_main(){
 			| rpl;//后三位111
 
 		p_proc->regs.eip = (u32)p_task->initial_eip;
-		p_proc->regs.esp = (u32)p_task_stack;
+		p_proc->regs.esp = (u32)p_task_stack;//栈用来供进程压栈用，目前每个仅分配32K
 		p_proc->regs.eflags = eflags; /* IF=1, IOPL=1 */
 		
 		p_proc->nr_tty=0;
@@ -98,7 +98,7 @@ public int kernel_main(){
 	p_proc_ready	= &proc_table[0];
 	init_clock();
 //	init_keyboard(); //tty.c中调用
-	//disp_str("--------------------------------\n");
+	disp_str("-----------call restart()------------\n");
 	restart();
 	
 	while(1);//not reach here
@@ -110,17 +110,17 @@ void procA(){
 	//disp_pos=0;
 		while(1){
 			//disp_color_str("A",BRIGHT|MAKE_COLOR(BLACK,GREEN));
-			printf("A ticks:%d    ",get_ticks());//
+			//printf("A ticks:%d    ",get_ticks());//
 			//delay(1);
-			milli_delay(1000);
-			//sleep(1);
+			//milli_delay(1000);
+			sleep(1);
 		}
 }
 void procB(){
 	//int i=0x100;
 		while(1){
-			//disp_color_str("B",BRIGHT|MAKE_COLOR(BLACK,GREEN));
-			printf("B: do you? \n");
+			//disp_color_str("B ",BRIGHT|MAKE_COLOR(BLACK,GREEN));
+			//printf("B: do you? \n");
 			//disp_str("|");
 			sleep(1);
 		}
@@ -128,7 +128,7 @@ void procB(){
 void procC(){
 	//int i=0x1000;
 		while(1){
-//			disp_color_str("C",BRIGHT|MAKE_COLOR(BLACK,GREEN));
+			//disp_color_str("C ",BRIGHT|MAKE_COLOR(BLACK,GREEN));
 			printf("C: Umm...(sleep) \n");
 			//disp_str("|");
 			sleep(2);

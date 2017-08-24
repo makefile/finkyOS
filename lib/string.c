@@ -1,4 +1,5 @@
 #include"string.h"
+//implement the printf %d func
 //#include"display.h"
 //#define swap(x,y) do{*(x)+=*(y);*(y)=*(x)-*(y);*(y)=*(x)-*(y);}while(0);
 #define swap(x,y) do{int tmp=*(x);*(x)=*(y);*(y)=tmp;}while(0);
@@ -8,7 +9,7 @@ void swap(int *x,int *y){
 	*x=*y;
 	*y=tmp;
 }
-*/
+*//*
 void str_rev(char*str){
 //	disp_int(str[0]);
 //	disp_int(str[1]);disp_int(str[2]);
@@ -21,3 +22,4 @@ void str_rev(char*str){
 //	disp_str("rev:");disp_str(str);disp_str("...");
 //	disp_int(str[2]);
 }
+*/

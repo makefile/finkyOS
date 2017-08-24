@@ -88,7 +88,6 @@ csinit:
 	;ud2
 	;push 0
 	;popfd ;pop top of stack into EFLAGS，let EFLAGS=0
-	
 ;	mov	ah, 1dh ;pink/blue	; 0000: 黑底    1111: 白字
 ;	mov	al, 'K'
 ;	mov	[gs:((80 * 5 + 39) * 2)], ax	; 屏幕第 5 行, 第 39 列
@@ -106,7 +105,6 @@ restart: ;在main.c中被调用
 	;惊喜啊，将lldt抄写成了lidt,导致bochs总是重启系统，其中日志显示3rd exception with no resolution,在OSDev Wiki中讲到可能是IDT内容或描述符出错
 	lea eax,[esp+P_STACKTOP]
 	mov dword [tss+TSS3_S_SP0],eax
-	;jmp re_enter
 re_enter: ;让重入的中断直接返回
 	dec dword [k_reenter] 
 ;	hlt        
@@ -115,51 +113,69 @@ re_enter: ;让重入的中断直接返回
         pop es
         pop ds
         popad
+        add esp, 4 ;return addr
         iretd
 ; 中断和异常 -- 硬件中断
 ; ---------------------------------
-%macro  hwint_master    1
-	pushad ;a,c,d,b,esp,ebp,esi,edi
-        push ds
-        push es
-        push fs
-        push gs ;为了不影响进程的执行，保存原寄存器，以防万一
-        ;因为mov al,EOI改变了al的值
-        mov dx,ss
-        mov ds,dx ;为了使用调用函数等
-        mov es,dx
-        mov fs,dx     
-	in al,INT_M_CTLMASK
-	or al,(1<<%1)
-	out INT_M_CTLMASK,al ;不容许再发生该中断,也就是不会再发生重入，那重入的代码也就没用了
-	
-        mov al,EOI ;reenable master 8259
-        out INT_M_CTL,al ;将EOI位置1,告诉8259A当前中断结束，否则不再发生时钟中断
-        mov esp,StackTop ;切换到内核栈
-
-        sti ;CPU在响应中断的过程中会自动关中断，下面的操作可能很耗时，应该容许其他中断的发生，如键盘响应等。
-        ;call clock_handler
-        push %1
-        call [irq_table+4 * %1]
-        pop ecx
-        cli
-       
-        in al,INT_M_CTLMASK
-	and al,~(1<<%1)
-	out INT_M_CTLMASK,al ;容许再发生该中断
-	
-	inc dword [k_reenter]
-        cmp dword [k_reenter],0
-        jne re_enter
-        jmp restart
-	
+%macro	hwint_master	1
+	call	save
+	in	al, INT_M_CTLMASK	; `.
+	or	al, (1 << %1)		;  | 屏蔽当前中断
+	out	INT_M_CTLMASK, al	; /
+	mov	al, EOI			; `. 置EOI位
+	out	INT_M_CTL, al		; /
+	sti	; CPU在响应中断的过程中会自动关中断，这句之后就允许响应新的中断
+	push	%1			; `.
+	call	[irq_table + 4 * %1]	;  | 中断处理程序
+	pop	ecx			; /
+	cli
+	in	al, INT_M_CTLMASK	; `.
+	and	al, ~(1 << %1)		;  | 恢复接受当前中断
+	out	INT_M_CTLMASK, al	; /
+	ret
 %endmacro
-; ---------------------------------
+;%macro  hwint_master    1
+;	pushad ;a,c,d,b,esp,ebp,esi,edi
+;        push ds
+;        push es
+;        push fs
+;        push gs ;为了不影响进程的执行，保存原寄存器，以防万一
+;        ;因为mov al,EOI改变了al的值
+;       mov dx,ss
+;        mov ds,dx ;为了使用调用函数等
+;       mov es,dx
+;       mov fs,dx     
+;	in al,INT_M_CTLMASK
+;	or al,(1<<%1)
+;	out INT_M_CTLMASK,al ;不容许再发生该中断,也就是不会再发生重入，那重入的代码也就没用了
+;	
+;       mov al,EOI ;reenable master 8259
+;        out INT_M_CTL,al ;将EOI位置1,告诉8259A当前中断结束，否则不再发生时钟中断
+;       mov esp,StackTop ;切换到内核栈
 
+;        sti ;CPU在响应中断的过程中会自动关中断，下面的操作可能很耗时，应该容许其他中断的发生，如键盘响应等。
+;        ;call clock_handler
+;       push %1
+;        call [irq_table+4 * %1]
+;        pop ecx
+;       cli
+       
+;       in al,INT_M_CTLMASK
+;	and al,~(1<<%1)
+;	out INT_M_CTLMASK,al ;容许再发生该中断
+	
+;	inc dword [k_reenter]
+;       cmp dword [k_reenter],0
+;        jne re_enter
+;        jmp restart
+	
+;%endmacro
+; ---------------------------------
+		
 ALIGN   16
 hwint00:                ; Interrupt routine for irq 0 (the clock).
-        ;inc byte [gs:14] ;第一行第5个字符跳动变化
-	hwint_master	0
+;        inc byte [gs:14] ;第一行第5个字符跳动变化
+		hwint_master	0	
 	
 ALIGN   16
 hwint01:                ; Interrupt routine for irq 1 (keyboard)
@@ -190,47 +206,66 @@ hwint07:                ; Interrupt routine for irq 7 (printer)
         hwint_master    7
 
 ; ---------------------------------
-%macro  hwint_slave     1
-	pushad ;a,c,d,b,esp,ebp,esi,edi
-        push ds
-        push es
-        push fs
-        push gs ;为了不影响进程的执行，保存原寄存器，以防万一
-        ;因为mov al,EOI改变了al的值
-        mov esi,edx ;保存edx，系统调用的第四个是参数
-        mov dx,ss
-        mov ds,dx ;这三个为了使用调用函数等
-        mov es,dx
-        mov fs,dx
-        mov edx,esi ;恢复edx
-        mov esi ,esp
-        mov esp,StackTop ;切换到内核栈
-        ;save over
-	in al,INT_S_CTLMASK
-	or al,(1<<(%1-8))
-	out INT_S_CTLMASK,al ;不容许再发生该中断
-	
-        mov al,EOI ;reenable master 8259
-        out INT_M_CTL,al ;将EOI位置1,告诉8259A当前中断结束，否则不再发生时钟中断
-        nop
-	out INT_S_CTL,al
-	mov esp,StackTop ;切换到内核栈
-
-        sti ;CPU在响应中断的过程中会自动关中断，下面的操作可能很耗时，应该容许其他中断的发生，如键盘响应等。
-        push %1
-        call [irq_table+4 * %1]
-        pop ecx
-        cli
-       
-        in al,INT_S_CTLMASK
-	and al,~(1<<(%1-8))
-	out INT_S_CTLMASK,al ;容许再发生该中断
-	
-	inc dword [k_reenter]
-        cmp dword [k_reenter],0
-        jne re_enter
-        jmp restart
+%macro	hwint_slave	1
+	call	save
+	in	al, INT_S_CTLMASK	; `.
+	or	al, (1 << (%1 - 8))	;  | 屏蔽当前中断
+	out	INT_S_CTLMASK, al	; /
+	mov	al, EOI			; `. 置EOI位(master)
+	out	INT_M_CTL, al		; /
+	nop				; `. 置EOI位(slave)
+	out	INT_S_CTL, al		; /  一定注意：slave和master都要置EOI
+	sti	; CPU在响应中断的过程中会自动关中断，这句之后就允许响应新的中断
+	push	%1			; `.
+	call	[irq_table + 4 * %1]	;  | 中断处理程序
+	pop	ecx			; /
+	cli
+	in	al, INT_S_CTLMASK	; `.
+	and	al, ~(1 << (%1 - 8))	;  | 恢复接受当前中断
+	out	INT_S_CTLMASK, al	; /
+	ret
 %endmacro
+;%macro  hwint_slave     1
+;	pushad ;a,c,d,b,esp,ebp,esi,edi
+;        push ds
+;        push es
+;        push fs
+;        push gs ;为了不影响进程的执行，保存原寄存器，以防万一
+;        ;因为mov al,EOI改变了al的值
+;        mov esi,edx ;保存edx，系统调用的第四个是参数
+;        mov dx,ss
+;        mov ds,dx ;这三个为了使用调用函数等
+;      ;  mov es,dx
+;     ;   mov fs,dx
+;   ;     mov edx,esi ;恢复edx
+;    ;    mov esi ,esp
+;  ;      mov esp,StackTop ;切换到内核栈
+; ;       ;save over
+;	in al,INT_S_CTLMASK
+;	or al,(1<<(%1-8))
+;	out INT_S_CTLMASK,al ;不容许再发生该中断
+	
+;        mov al,EOI ;reenable master 8259
+;        out INT_M_CTL,al ;将EOI位置1,告诉8259A当前中断结束，否则不再发生时钟中断
+;       nop
+;	out INT_S_CTL,al
+;	mov esp,StackTop ;切换到内核栈
+
+;        sti ;CPU在响应中断的过程中会自动关中断，下面的操作可能很耗时，应该容许其他中断的发生，如键盘响应等。
+;        push %1
+;        call [irq_table+4 * %1]
+;        pop ecx
+;        cli
+;       
+;       in al,INT_S_CTLMASK
+;	and al,~(1<<(%1-8))
+;	out INT_S_CTLMASK,al ;容许再发生该中断
+;	
+;	inc dword [k_reenter]
+;        cmp dword [k_reenter],0
+;        jne re_enter
+;        jmp restart
+;%endmacro
 ; ---------------------------------
 
 ALIGN   16
@@ -330,45 +365,54 @@ exception:
 	add	esp, 4*2	; 相当于弹出两个，让栈顶指向 EIP，
 				;堆栈中从顶向下依次是：EIP、CS、EFLAGS
 	hlt
+save:
+        pushad          ; `.
+        push    ds      ;  |
+        push    es      ;  | 保存原寄存器值
+        push    fs      ;  |
+        push    gs      ; /
+
+	;; 注意，从这里开始，一直到 `mov esp, StackTop'，中间坚决不能用 push/pop 指令，
+	;; 因为当前 esp 指向 proc_table 里的某个位置，push 会破坏掉进程表，导致灾难性后果！
+
+	mov	esi, edx	; 保存 edx，因为 edx 里保存了系统调用的参数
+				;（没用栈，而是用了另一个寄存器 esi）
+	mov	dx, ss
+	mov	ds, dx
+	mov	es, dx
+	mov	fs, dx
+
+	mov	edx, esi	; 恢复 edx
+
+        mov     esi, esp                    ;esi = 进程表起始地址
+
+        inc     dword [k_reenter]           ;k_reenter++;
+        cmp     dword [k_reenter], 0        ;if(k_reenter ==0)
+        jne     .1                          ;{
+        mov     esp, StackTop               ;  mov esp, StackTop <--切换到内核栈
+        push    restart                     ;  push restart
+        jmp     [esi + RETADR - P_STACKBASE];  return;
+.1:                                         ;} else { 已经在内核栈，不需要再切换
+        push    re_enter             ;  push re_enter
+        jmp     [esi + RETADR - P_STACKBASE];  return;
+                                            ;}
+
 sys_call:
-	inc dword [k_reenter]
-        cmp dword [k_reenter],0
-        je .sys_call_next
-        dec dword [k_reenter]
-        iretd
-.sys_call_next:
-	pushad ;a,c,d,b,esp,ebp,esi,edi
-        push ds
-        push es
-        push fs
-        push gs ;为了不影响进程的执行，保存原寄存器，以防万一
-        ;因为mov al,EOI改变了al的值
-        mov esi,edx ;保存edx，系统调用的第四个是参数
-        mov dx,ss
-        mov ds,dx ;这三个为了使用调用函数等
-        mov es,dx
-        mov fs,dx
-        mov edx,esi ;恢复edx
-        mov esi ,esp
-        mov esp,StackTop ;切换到内核栈
-        ;save over
-;        inc dword [k_reenter]
-;        cmp dword [k_reenter],0
-;        jne re_enter
-        
-        push esi ;sys_write调用者指针
-        push dword [p_proc_ready]
-        push edx
-        push ecx
-        push ebx
-        
-;        sti
-        call [sys_call_table+eax*4] ;系统调用的代码要在内核栈中运行
-        add esp,16 ;4*4
-        pop esi
-        mov [esi+EAXREG-P_STACKBASE],eax ;return val
-        
-;        cli
-       
-        jmp restart
-        
+        call    save
+
+        sti
+	push	esi
+
+	push	dword [p_proc_ready]
+	push	edx
+	push	ecx
+	push	ebx
+        call    [sys_call_table + eax * 4]
+	add	esp, 4 * 4
+
+	pop	esi
+        mov     [esi + EAXREG - P_STACKBASE], eax
+        cli
+
+        ret
+    
